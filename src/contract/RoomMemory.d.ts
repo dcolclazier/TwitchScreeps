@@ -1,0 +1,5 @@
+interface RoomMemory{
+
+    initialized: boolean
+}
+
