@@ -1,8 +1,10 @@
-import { JobType, CreepTaskType, SpawnLevel } from "contract/types";
+import { JobType, CreepTaskType, SpawnLevel, TaskCategory } from "contract/types";
 import { BuildTask } from "tasks/creep/BuildTask";
 import { RestockTask } from "tasks/creep/RestockTask";
 import { MineTask } from "tasks/creep/MineTask";
 import { UpgradeTask } from "tasks/creep/UpgradeTask";
+import { ITaskCatalog } from "contract/ITaskCatalog";
+import { CreepTask } from "tasks/base/CreepTask";
 
 
 
@@ -44,7 +46,57 @@ export class CreepFactory {
         if (upgradeSpawn.spawnCreep)
             this.spawnCreep(spawn.id, upgradeSpawn.jobType, upgradeSpawn.spawnLevel);
 
+        let creepTasks = [];
+        const tasks = ITaskCatalog.GetImplementations();
+        for(let id in tasks){
+            var task = new tasks[id]();
+            if(task.category === TaskCategory.Creep) creepTasks.push(task);
+        }
+        let sorted = _.sortBy(creepTasks, l => global.taskCatalog[l.type].priority);
+        for(let id in sorted){
+            let task = sorted[id] as CreepTask;
+            console.log("yes? " + task.type)
+            //this.spawnCreep2(spawn.id, task.getSpawnInfo(spawn.room.name));
+        }
+    }
+    private spawnCreep2(spawnId: Id<StructureSpawn>, info: SpawnInfo){
 
+        if(!info.spawnCreep) return;
+
+        const creepTemplate = global.creepCatalog[info.spawnLevel][info.jobType];
+        const bodyParts = creepTemplate.bodyParts;
+        const taskTypes = creepTemplate.taskTypes;
+        const spawn = Game.getObjectById(spawnId) as StructureSpawn;
+        let creepName = `${spawn.room.name}_${info.jobType}${global.util.memory.getUniqueId()}_${info.spawnLevel}`;
+
+        let status: number | string = spawn.spawnCreep(bodyParts, creepName, {
+            dryRun: true
+        });
+
+        status = _.isString(status) ? OK : status;
+        while (status === -3) {
+            console.log("OMG OMG OMG YOURE UNIQUE ALGORITHM SUCKS!!!!!!!!!");
+            creepName = `${spawn.room.name}_${info.jobType}${global.util.memory.getUniqueId()}_${info.spawnLevel}`;
+            status = spawn.spawnCreep(bodyParts, creepName, {
+                dryRun: true
+            });
+            status = _.isString(status) ? OK : status;
+        }
+        if (status === OK && spawn.spawning !== (null || undefined)) {
+            const mem: CreepMemory = {
+                acceptedTaskTypes: taskTypes,
+                currentTaskId: "",
+                currentTaskStatus: "WAITING",
+                jobType: info.jobType
+            };
+            status = spawn.spawnCreep(bodyParts, creepName, {
+                memory: mem
+            });
+            return _.isString(status) ? OK : status;
+        }
+        else {
+            return status;
+        }
     }
 
     private spawnCreep(spawnId: Id<StructureSpawn>, jobType: JobType, spawnLevel: SpawnLevel): number {

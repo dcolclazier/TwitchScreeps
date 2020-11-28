@@ -14,6 +14,9 @@ export class MineTaskRequest extends CreepTaskRequest {
 }
 @ITaskCatalog.register
 export class MineTask extends CreepTask {
+    test(): void {
+        throw new Error("Method not implemented.");
+    }
     public addRequests(roomName: string): void {
         const room = Game.rooms[roomName];
         if(room === (null || undefined)) return;
