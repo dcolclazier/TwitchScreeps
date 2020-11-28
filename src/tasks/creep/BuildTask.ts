@@ -79,7 +79,7 @@ export class BuildTask extends CreepTask {
 
     public addRequests(roomName: string): void {
         const room = Game.rooms[roomName];
-        if(Utility.isNullOrUndefined(room)) return;
+        if(room === null || room === undefined) return;
 
         var constructionSites = room.find(FIND_CONSTRUCTION_SITES);
         if(constructionSites.length > 0){

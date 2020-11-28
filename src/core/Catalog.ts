@@ -24,15 +24,15 @@ export class TaskInit{
     },
     [CreepTaskType.MineTask]:{
       priority: 1,
-      creepsPerTask: 1
+      creepsPerTask: 2
     },
     [CreepTaskType.RestockTask]:{
       priority: 2,
-      creepsPerTask: 1
+      creepsPerTask: 2
     },
     [CreepTaskType.UpgradeTask]:{
       priority: 3,
-      creepsPerTask: 1
+      creepsPerTask: 3
     }
   }
 
