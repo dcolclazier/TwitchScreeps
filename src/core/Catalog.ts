@@ -19,20 +19,100 @@ export class TaskInit{
 
   global.taskCatalog = {
     [CreepTaskType.BuildTask]:{
-      priority: 3,
-      creepsPerTask: 1
+      [SpawnLevel.Level1]:{
+        priority: 3,
+        creepsPerTask: {
+          [JobType.Janitor]:0,
+          [JobType.Miner]:0,
+          [JobType.Upgrader]:0,
+          [JobType.Worker]:0,
+          [JobType.Builder]:1
+        },
+        acceptedJobTypes: [JobType.Builder]
+      },
+      [SpawnLevel.Level2]:{
+        priority: 3,
+        creepsPerTask: {
+          [JobType.Janitor]:0,
+          [JobType.Miner]:0,
+          [JobType.Upgrader]:0,
+          [JobType.Worker]:1,
+          [JobType.Builder]:1
+        },
+        acceptedJobTypes: [JobType.Builder, JobType.Worker]
+      }
     },
     [CreepTaskType.MineTask]:{
-      priority: 1,
-      creepsPerTask: 2
+      [SpawnLevel.Level1]:{
+        priority: 1,
+        creepsPerTask: {
+          [JobType.Janitor]:0,
+          [JobType.Miner]:2,
+          [JobType.Upgrader]:0,
+          [JobType.Worker]:0,
+          [JobType.Builder]:0
+        },
+        acceptedJobTypes: [JobType.Miner]
+      },
+      [SpawnLevel.Level2]:{
+        priority: 1,
+        creepsPerTask: {
+          [JobType.Janitor]:0,
+          [JobType.Miner]:2,
+          [JobType.Upgrader]:0,
+          [JobType.Worker]:0,
+          [JobType.Builder]:0
+        },
+        acceptedJobTypes: [JobType.Miner]
+      }
     },
     [CreepTaskType.RestockTask]:{
-      priority: 2,
-      creepsPerTask: 2
+      [SpawnLevel.Level1]:{
+        priority: 2,
+        creepsPerTask: {
+          [JobType.Janitor]:2,
+          [JobType.Miner]:0,
+          [JobType.Upgrader]:0,
+          [JobType.Worker]:0,
+          [JobType.Builder]:0
+        },
+        acceptedJobTypes: [JobType.Janitor]
+      },
+      [SpawnLevel.Level2]:{
+        priority: 2,
+        creepsPerTask: {
+          [JobType.Janitor]:2,
+          [JobType.Miner]:0,
+          [JobType.Upgrader]:0,
+          [JobType.Worker]:0,
+          [JobType.Builder]:0
+        },
+        acceptedJobTypes: [JobType.Janitor, JobType.Worker]
+      }
     },
     [CreepTaskType.UpgradeTask]:{
-      priority: 3,
-      creepsPerTask: 3
+      [SpawnLevel.Level1]:{
+        priority: 3,
+        creepsPerTask: {
+          [JobType.Janitor]:0,
+          [JobType.Miner]:0,
+          [JobType.Upgrader]:1,
+          [JobType.Worker]:0,
+          [JobType.Builder]:0
+        },
+        acceptedJobTypes: [JobType.Upgrader]
+      },
+      [SpawnLevel.Level2]:{
+        priority: 3,
+        creepsPerTask: {
+          [JobType.Janitor]:0,
+          [JobType.Miner]:0,
+          [JobType.Upgrader]:3,
+          [JobType.Worker]:0,
+          [JobType.Builder]:0
+        },
+        acceptedJobTypes: [JobType.Upgrader]
+      }
     }
   }
 
@@ -52,12 +132,12 @@ export class TaskInit{
     },
     [JobType.Janitor]:{
       [SpawnLevel.Level1]: {
-        bodyParts: [MOVE, CARRY, CARRY],
+        bodyParts: [MOVE, MOVE, CARRY, CARRY],
         taskTypes: [CreepTaskType.RestockTask],
         maxPerRoom: 1
       },
       [SpawnLevel.Level2]: {
-        bodyParts: [MOVE, MOVE, CARRY, CARRY, CARRY, WORK],
+        bodyParts: [MOVE, MOVE, MOVE, CARRY, CARRY, WORK],
         taskTypes: [CreepTaskType.RestockTask],
         maxPerRoom:3
       }
@@ -76,12 +156,12 @@ export class TaskInit{
     },
     [JobType.Upgrader]: {
       [SpawnLevel.Level1]: {
-        bodyParts: [MOVE, CARRY, WORK, WORK],
-        taskTypes: [CreepTaskType.BuildTask],
+        bodyParts: [MOVE, MOVE, CARRY, WORK],
+        taskTypes: [CreepTaskType.UpgradeTask],
         maxPerRoom: 2
       },
       [SpawnLevel.Level2]: {
-        bodyParts: [MOVE, MOVE, CARRY, CARRY, WORK, WORK, WORK],
+        bodyParts: [MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, WORK, WORK],
         taskTypes: [CreepTaskType.UpgradeTask],
         maxPerRoom:3
       }
@@ -93,7 +173,7 @@ export class TaskInit{
         maxPerRoom: 2
       },
       [SpawnLevel.Level2]: {
-        bodyParts: [MOVE, MOVE, CARRY, CARRY, WORK, WORK],
+        bodyParts: [MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, WORK, WORK],
         taskTypes: [CreepTaskType.BuildTask],
         maxPerRoom:3
       }

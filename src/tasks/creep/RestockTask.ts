@@ -1,11 +1,11 @@
 import { CreepTask } from ".././base/CreepTask";
 import { CreepTaskRequest } from ".././base/CreepTaskRequest";
-import TaskType, { CreepTaskType, JobType } from "../../contract/types";
+import TaskType, { CreepTaskType } from "../../contract/types";
 import { ITaskCatalog as ITaskCatalog } from "contract/ITaskCatalog";
-
+import { Logger } from "utils/Logger";
 
 export class RestockTaskRequest extends CreepTaskRequest {
-    jobType: JobType = JobType.Janitor;
+
     type: TaskType = CreepTaskType.RestockTask;
     usesTargetId: boolean = false;
 
@@ -21,7 +21,6 @@ export class RestockTask extends CreepTask {
     type: TaskType = CreepTaskType.RestockTask;
     image: string = "🛒";
     currentRestockId: string | undefined = undefined;
-
 
     protected prepare(creepName: string): void {
         const creep = Game.creeps[creepName];
@@ -45,19 +44,6 @@ export class RestockTask extends CreepTask {
 
     }
 
-    private getNextRestockId(creepName: string): string {
-
-        const creep = Game.creeps[creepName];
-        const restockables = global.util.room.getRestockables(creep.room.name)
-            .sort((structureA, structureB) => creep.pos.getRangeTo(structureA) - creep.pos.getRangeTo(structureB));
-
-        if (restockables.length === 0)
-            return "";
-        else {
-            const id = restockables[0].id;
-            return id === undefined ? "" : id;
-        }
-    }
     protected work(creepName: string): void {
 
         const creep = Game.creeps[creepName];
@@ -82,25 +68,43 @@ export class RestockTask extends CreepTask {
             creep.moveTo(target);
         }
     }
+
     protected cooldown(creepName: string): void {
     }
-    public getSpawnInfo(roomName: string): SpawnInfo {
 
-        return this._getSpawnInfo(roomName, JobType.Janitor, CreepTaskType.RestockTask, () => true)
-
+    public getSpawnInfo(roomName: string): SpawnInfo[]{
+        return this._getSpawnInfo(roomName, this.type, () => true);
     }
 
     public addRequests(roomName: string): void {
 
-        const room = Game.rooms[roomName];
-        if(room?.controller === (null || undefined)) return;
-        var restockTasks = global.taskManager.getTasks(roomName, CreepTaskType.RestockTask) as CreepTaskRequest[];
+        const room = this.validateOwnedRoom(roomName);
+        if(room?.controller === undefined) return;
 
-        if(!_.any(restockTasks)){
-            global.taskManager.addTaskRequest(new RestockTaskRequest(room.controller.id, roomName, roomName))
+        if(global.util.room.getRestockables(roomName).length === 0) {
+            Logger.LogTrace(`No restockables found in ${roomName}. No requests will be added`);
+            return;
         }
 
+        var restockTasks = global.taskManager.getTasks(roomName, CreepTaskType.RestockTask) as CreepTaskRequest[];
+        if(!_.any(restockTasks)){
+            Logger.LogTrace(`Adding restock task to room ${roomName}`);
+            global.taskManager.addTaskRequest(new RestockTaskRequest(room.controller.id, roomName, roomName))
+        }
     }
-}
 
-RestockTask.name
+    private getNextRestockId(creepName: string): string {
+
+        const creep = Game.creeps[creepName];
+        const restockables = global.util.room.getRestockables(creep.room.name)
+            .sort((structureA, structureB) => creep.pos.getRangeTo(structureA) - creep.pos.getRangeTo(structureB));
+
+        if (restockables.length === 0)
+            return "";
+        else {
+            const id = restockables[0].id;
+            return id === undefined ? "" : id;
+        }
+    }
+
+}

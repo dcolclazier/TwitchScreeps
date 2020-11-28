@@ -1,22 +1,23 @@
-import { Utility } from "core/Utility";
 import { CreepTask } from "../base/CreepTask";
 import { CreepTaskRequest } from "../base/CreepTaskRequest";
 import TaskType, { CreepTaskType, JobType } from "../../contract/types";
 import { ITaskCatalog } from "contract/ITaskCatalog";
+import { Logger } from "utils/Logger";
 
 export class BuildTaskRequest extends CreepTaskRequest {
-    jobType: JobType = JobType.Builder;
+
     creepsNeeded: number = 1;
     type: TaskType = CreepTaskType.BuildTask;
     usesTargetId: boolean = true;
+
     constructor(constructionSiteId: Id<ConstructionSite>, originatingRoom: string, targetRoom: string) {
         super(originatingRoom, targetRoom, constructionSiteId);
 
     }
 }
+
 @ITaskCatalog.register
 export class BuildTask extends CreepTask {
-
 
     image: string = "🚧";
     type: TaskType = CreepTaskType.BuildTask
@@ -50,6 +51,7 @@ export class BuildTask extends CreepTask {
             }
 
     }
+
     protected work(creepName: string): void {
 
         if (creepName === "") return;
@@ -72,9 +74,14 @@ export class BuildTask extends CreepTask {
         }
 
     }
+
     protected cooldown(creepName: string): void {
         //Not used for this task
+    }
 
+    public getSpawnInfo(roomName: string): SpawnInfo[] {
+
+        return this._getSpawnInfo(roomName, this.type, () => true);
     }
 
     public addRequests(roomName: string): void {
@@ -89,15 +96,11 @@ export class BuildTask extends CreepTask {
 
             if(_.find(buildTasks, b => b.targetId === site.id) === undefined)
             {
-              console.log("Adding a build task")
-              global.taskManager.addTaskRequest(new BuildTaskRequest(site.id, roomName, roomName));
+                Logger.LogTrace(`Adding ${this.type} task to room ${roomName}`);
+                global.taskManager.addTaskRequest(new BuildTaskRequest(site.id, roomName, roomName));
             }
           }
         }
-    }
-    public getSpawnInfo(roomName: string): SpawnInfo {
-
-        return this._getSpawnInfo(roomName, JobType.Builder, CreepTaskType.BuildTask, () => true);
     }
 }
 

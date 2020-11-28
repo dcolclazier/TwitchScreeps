@@ -24,7 +24,6 @@ declare class RoomUtil {
 }
 declare class MemoryUtil{
     public cleanupCreeps() : void
-    public getUniqueId() : string
     public clearMemory() : void
     public initialize() : void
     public cleanup() : void
@@ -37,9 +36,10 @@ declare class TaskManager{
 }
 declare interface ITaskInformation{
   priority: number,
-  creepsPerTask: number
+  creepsPerTask: Record<import("./contract/types").JobType, number>
+  acceptedJobTypes: import("./contract/types").JobType[]
 }
-type TaskCatalog = Record<import("./contract/types").TaskType, ITaskInformation>
+type TaskCatalog = Record<import("./contract/types").TaskType, Record<import("./contract/types").SpawnLevel,ITaskInformation>>
 type CreepCatalog = Record<import("./contract/types").JobType, Record<import("./contract/types").SpawnLevel, ICreepTemplate>>
 
 type IsCreepMemory = { acceptedTaskTypes: import("./contract/types").TaskType[] }

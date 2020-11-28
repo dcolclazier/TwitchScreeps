@@ -1,7 +1,7 @@
 declare interface ITaskRequest {
     type: import("contract/types").TaskType
     category: import("contract/types").TaskCategory;
-    jobType: import("contract/types").JobType;
+    // acceptedJobTypes: import("contract/types").JobType[]
     id: string;
     targetRoom: string;
     originatingRoom: string;

@@ -1,27 +1,29 @@
 import { CreepTask } from "tasks/base/CreepTask";
 import { CreepTaskRequest } from "tasks/base/CreepTaskRequest";
-import TaskType, { CreepTaskType, TaskCategory } from "contract/types";
+import TaskType, { TaskCategory } from "contract/types";
 import { ITaskCatalog } from "contract/ITaskCatalog";
 import { Governor } from "./Governor";
-// import { BuildTask, BuildTaskRequest } from "tasks/creep/BuildTask";
-// import { MineTask, MineTaskRequest } from "tasks/creep/MineTask";
-// import { RestockTask, RestockTaskRequest } from "tasks/creep/RestockTask";
-// import { UpgradeTask, UpgradeTaskRequest } from "tasks/creep/UpgradeTask";
+import { Logger } from "utils/Logger";
 
 export class TaskManager{
 
     public addTaskRequest(request : ITaskRequest){
+
+        Logger.LogInformation(`Registering ${request.targetRoom}::${request.category}:${request.type}:${request.id} request`)
         Memory.tasks[request.originatingRoom][request.id] = request;
     }
 
     public getTasks(roomName: string, type: TaskType) : ITaskRequest[]{
 
         const roomTasks = Memory.tasks[roomName];
-        let toReturn = <ITaskRequest[]>[];
-        if(roomTasks === undefined || roomTasks === null || roomTasks === {}) return [];
+        const toReturn = <ITaskRequest[]>[];
+        if(roomTasks === undefined || roomTasks === null || roomTasks === {}) {
+            Logger.LogTrace(`No tasks found for room ${roomName}`);
+            return [];
+        }
 
         for(let taskId in roomTasks){
-            const task = roomTasks[taskId] as ITaskRequest;
+            const task = roomTasks[taskId];
             if(task.type === type) toReturn.push(task);
         }
         return toReturn;
@@ -31,99 +33,134 @@ export class TaskManager{
 
         const tasks = Memory.tasks[roomName];
         const room = Game.rooms[roomName];
-        if(room === undefined || room === null) return;
+        if(room === undefined || room === null) {
+            Logger.LogWarning(`Can't run tasks for room ${roomName} - room is undefined in Game.rooms`)
+            return;
+        }
         this.addTaskRequests(roomName);
 
         for(let requestId in tasks){
-            let request = tasks[requestId];
+
+            const request = tasks[requestId];
             if(request.isFinished)
             {
+                Logger.LogTrace(`Unregistering complete task ${request.type}${request.id}`);
                 delete tasks[requestId];
             }
             else{
-                this.cleanTaskRequest(roomName, requestId);
-
-                if(request.category == TaskCategory.Creep) {
-
-                    this.processCreepTaskRequest(roomName, requestId);
+                switch(request.category){
+                    case TaskCategory.Creep:
+                        this.processCreepTaskRequest(roomName, requestId);
+                        break;
+                    case TaskCategory.Structure:
+                        throw new Error("runTasks::processStructureTaskRequest is not implemented");
                 }
-                else if(request.category == TaskCategory.Structure) throw new Error("Not implemented");
-
             }
         }
 
         Memory.tasks[roomName] = tasks;
     }
 
-    private getUnassignedCreep(roomName: string, taskType: TaskType) : string | undefined{
+    private processCreepTaskRequest(roomName: string, requestId: string) : void {
 
+        const request = this.unassignDeadCreeps(roomName, requestId);
+        if(request.creepsAssigned.length !== 0)
+        {
+            const task = this.getTask(request);
+            if(task === undefined){
+                Logger.LogWarning(`The task for ${request.type} was not found... did you register it properly in the catalog?`);
+                return;
+            }
+            Logger.LogTrace(`Running ${request.type} task (${request.id}) in ${roomName}`);
+            task.run();
+        }
+        if(request.isFinished) return;
+        this.assignMissingCreeps(roomName, requestId);
+    }
+
+    private getUnassignedCreep(roomName: string, taskType: TaskType) : string | undefined{
 
         for(let creepName in Game.creeps){
             const creep = Game.creeps[creepName];
 
-            if(creep === null || creep === undefined) continue;
-            if(creep.memory === undefined) continue;
-            if(creep.room.name != roomName) continue;
-
-            if(!_.contains(creep.memory.acceptedTaskTypes, taskType)){
+            if(creep === null) {
+                Logger.LogTrace("In getUnassignedCreep, creep was null.")
                 continue;
             }
+            if(creep.memory === undefined) {
+                Logger.LogTrace("In getUnassignedCreep, creep had no memory.")
+                continue;
+            }
+            if(!_.contains(creep.memory.acceptedTaskTypes, taskType)){
+                Logger.LogTrace(`In getUnassignedCreep, ${creepName} does not contain ${taskType}... ${JSON.stringify(creep.memory.acceptedTaskTypes)}`);
+                continue;
+            }
+            if(creep.room.name != roomName) {
+                Logger.LogTrace(`In getUnassignedCreep, ${creepName} is not in ${roomName}`)
+                continue;
+            }
+
             if(creep.memory.currentTaskId !== "") continue;
             return creepName;
         }
         return undefined;
     }
 
-    private processCreepTaskRequest(roomName: string, requestId: string) {
+    private assignMissingCreeps(roomName: string, requestId: string) {
 
         const request = Memory.tasks[roomName][requestId] as CreepTaskRequest;
-
-        if(request.creepsAssigned.length !== 0)
-        {
-            const task = this.getTask(request);
-            if(task === null || task === undefined){
-                console.log(`ERROR: task for ${request.type} was not found...`);
-                return;
-            }
-            task.run();
-        }
-        if(request.isFinished) return;
-
         const spawnLevel = Governor.getSpawnLevel(roomName);
-        const taskType =  request.type as CreepTaskType;
-        const creepsPerTask = global.taskCatalog[taskType].creepsPerTask;
+        const acceptedJobTypes = global.taskCatalog[request.type][spawnLevel].acceptedJobTypes;
 
-        if (request.creepsAssigned.length < creepsPerTask) {
+        for(let id in acceptedJobTypes){
+            const jobType = acceptedJobTypes[id];
+            const creepsPerTask = global.taskCatalog[request.type][spawnLevel].creepsPerTask[jobType];
+            if (request.creepsAssigned.length < creepsPerTask) {
 
-            let assignmentsNeeded = creepsPerTask- request.creepsAssigned.length;
-            for(let x = 0; x < assignmentsNeeded; x++){
+                let assignmentsNeeded = creepsPerTask - request.creepsAssigned.length;
+                for(let x = 0; x < assignmentsNeeded; x++){
+                    //if we can't assign, no need to continue;
+                    if(!this.assignRequestToCreep(roomName, requestId)) break;
+                }
 
-                let creepName = this.getUnassignedCreep(request.targetRoom, request.type);
-                if(creepName === undefined) break;
-                const creep = Game.creeps[creepName];
-                creep.memory.currentTaskId = request.id;
-                request.creepsAssigned.push(creepName);
-                console.log(`Assigned ${request.type}${request.id} to ${creepName}`);
             }
-
         }
+
     }
 
-    private cleanTaskRequest(roomName: string, requestId: string){
+    private assignRequestToCreep(roomName: string, requestId: string) : boolean {
 
-        const iTask = Memory.tasks[roomName][requestId];
-        if(iTask.category === TaskCategory.Creep){
-            const request = iTask as CreepTaskRequest;
-            for(let name of request.creepsAssigned){
-                const creep = Game.creeps[name];
-                if(creep === null || creep === undefined){
-                    console.log(`Unassigning ${name} from ${request.category}${request.id} (Dead)`)
-                    request.creepsAssigned = _.filter(request.creepsAssigned, c => c != name);
-                }
-            }
+        const request = Memory.tasks[roomName][requestId] as CreepTaskRequest
+        let creepName = this.getUnassignedCreep(request.targetRoom, request.type);
+        if(creepName === undefined) {
+            Logger.LogTrace("In assignRequestToCreep, couldn't assign - idle creep not found.");
+            return false;
         }
 
-        //todo handle case for STRUCTURE
+        const creep = Game.creeps[creepName];
+        if(creep === null) {
+            Logger.LogTrace("In assignRequestToCreep, couln't assign - creep was null")
+            return false;
+        }
+
+        creep.memory.currentTaskId = request.id;
+        request.creepsAssigned.push(creepName);
+        Logger.LogInformation(`Assigned ${request.type}${request.id} to ${creepName}`)
+        return true;
+
+    }
+
+    private unassignDeadCreeps(roomName: string, requestId: string) : CreepTaskRequest{
+        const request = Memory.tasks[roomName][requestId] as CreepTaskRequest;
+        for(let name of request.creepsAssigned){
+            const creep = Game.creeps[name];
+            if(creep === null || creep === undefined)
+            {
+                Logger.LogInformation(`Unassigning ${name} from ${request.category}${request.id} (Dead)`)
+                request.creepsAssigned = _.filter(request.creepsAssigned, c => c != name);
+            }
+        }
+        return request;
     }
 
     private getTask(request : ITaskRequest) : ITask | undefined{
@@ -145,7 +182,5 @@ export class TaskManager{
             task.addRequests(roomName);
         }
     }
-    //#endregion
-
 
 }

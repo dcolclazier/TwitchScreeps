@@ -1,10 +1,11 @@
 import { CreepTask } from ".././base/CreepTask";
 import { CreepTaskRequest } from ".././base/CreepTaskRequest";
-import TaskType, { CreepTaskType, JobType } from "../../contract/types";
+import TaskType, { CreepTaskType } from "../../contract/types";
 import { ITaskCatalog } from "contract/ITaskCatalog";
+import { Logger } from "utils/Logger";
 
 export class UpgradeTaskRequest extends CreepTaskRequest {
-    jobType: JobType = JobType.Upgrader;
+
     type: TaskType = CreepTaskType.UpgradeTask;
     usesTargetId: boolean = true;
     getTask(): ICreepTask {
@@ -60,19 +61,24 @@ export class UpgradeTask extends CreepTask {
         }
 
     }
-    protected cooldown(creepName: string): void { }
 
-    public getSpawnInfo(roomName: string): SpawnInfo {
-        return this._getSpawnInfo(roomName, JobType.Upgrader, this.type as CreepTaskType, () => true)
+    protected cooldown(creepName: string): void {
+
+    }
+
+    public getSpawnInfo(roomName: string): SpawnInfo[] {
+        return this._getSpawnInfo(roomName, this.type, () => true);
     }
 
     public addRequests(roomName: string) {
 
-        const room = Game.rooms[roomName];
-        if(room?.controller === (null || undefined)) return;
+        const room = this.validateOwnedRoom(roomName);
+        if(room?.controller === undefined) return;
+
         var upgradeTasks = global.taskManager.getTasks(roomName, CreepTaskType.UpgradeTask) as CreepTaskRequest[];
 
         if(!_.any(upgradeTasks)){
+            Logger.LogTrace(`Adding ${this.type} task to room ${roomName}`);
             global.taskManager.addTaskRequest(new UpgradeTaskRequest(room.controller.id, roomName, roomName))
         }
     }
