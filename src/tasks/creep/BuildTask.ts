@@ -16,7 +16,7 @@ export class BuildTaskRequest extends CreepTaskRequest {
 }
 @ITaskCatalog.register
 export class BuildTask extends CreepTask {
-    test(): void {
+    getSpawnInfo(): void {
         throw new Error("Method not implemented.");
     }
 

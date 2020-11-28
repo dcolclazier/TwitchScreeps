@@ -13,7 +13,7 @@ export abstract class CreepTask extends Task
     protected abstract work(creepName: string): void
     protected abstract prepare(creepName: string): void
     protected abstract cooldown(creepName: string): void
-    public abstract test(): void
+    public abstract getSpawnInfo(): void
 
     //doesnt need to live here - this is governor shit...
     public static getSpawnLevel(roomName: string) : SpawnLevel{

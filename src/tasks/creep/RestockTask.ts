@@ -17,7 +17,7 @@ export class RestockTaskRequest extends CreepTaskRequest {
 
 @ITaskCatalog.register
 export class RestockTask extends CreepTask {
-    test(): void {
+    getSpawnInfo(): void {
         throw new Error("Method not implemented.");
     }
 
