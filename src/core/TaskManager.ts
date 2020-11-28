@@ -90,7 +90,7 @@ export class TaskManager{
 
         const spawnLevel = CreepTask.getSpawnLevel(roomName);
         const taskType =  request.type as CreepTaskType;
-        const creepsPerTask = global.creepCatalog[spawnLevel][request.jobType].creepsPerTask[taskType];
+        const creepsPerTask = global.taskCatalog[taskType].creepsPerTask;
         // if(request.type == CreepTaskType.RestockTask){
 
         //     console.log(spawnLevel);
@@ -138,7 +138,7 @@ export class TaskManager{
             let test = new t(request) as ITask;
             return test.type === request.type;
         });
-        console.log(JSON.stringify(tasks));
+        // console.log(JSON.stringify(tasks));
         if(tasks.length === 0) return undefined;
         return new tasks[0](request);
 
