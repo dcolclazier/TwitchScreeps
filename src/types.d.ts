@@ -11,6 +11,7 @@ declare namespace NodeJS {
     taskManager: TaskManager
     owner: string
     creepCatalog: CreepCatalog
+    taskCatalog: TaskCatalog
   }
 }
 interface ICreepTask extends ITask
@@ -34,7 +35,10 @@ declare class TaskManager{
   public getTasks(roomName: string, type: import("./contract/types").TaskType) : ITaskRequest[];
   public runTasks(roomName:string) : void;
 }
-
+declare interface ITaskInformation{
+  priority: number
+}
+type TaskCatalog = Record<import("./contract/types").TaskType, ITaskInformation>
 type CreepCatalog = Record<import("./contract/types").SpawnLevel, Record<import("./contract/types").JobType, ICreepTemplate>>
 
 type IsCreepMemory = { acceptedTaskTypes: import("./contract/types").TaskType[] }

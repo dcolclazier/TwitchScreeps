@@ -79,6 +79,23 @@ export class MemoryUtil
   }
 
 }
+
+
+global.taskCatalog = {
+  [CreepTaskType.BuildTask]:{
+    priority: 3,
+  },
+  [CreepTaskType.MineTask]:{
+    priority: 1,
+  },
+  [CreepTaskType.RestockTask]:{
+    priority: 2,
+  },
+  [CreepTaskType.UpgradeTask]:{
+    priority: 3,
+  }
+}
+
 global.creepCatalog = {
   [SpawnLevel.Level1]: {
       [JobType.Worker]: {
