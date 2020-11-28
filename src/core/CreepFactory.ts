@@ -55,7 +55,7 @@ export class CreepFactory {
         let sorted = _.sortBy(creepTasks, l => global.taskCatalog[l.type].priority);
         for(let id in sorted){
             let task = sorted[id] as CreepTask;
-            console.log("yes? " + task.type)
+            console.log("yes? " + JSON.stringify(task.getSpawnInfo(spawn.room.name)));
             //this.spawnCreep2(spawn.id, task.getSpawnInfo(spawn.room.name));
         }
     }

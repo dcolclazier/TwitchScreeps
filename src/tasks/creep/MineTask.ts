@@ -14,8 +14,12 @@ export class MineTaskRequest extends CreepTaskRequest {
 }
 @ITaskCatalog.register
 export class MineTask extends CreepTask {
-    getSpawnInfo(): void {
-        throw new Error("Method not implemented.");
+    getSpawnInfo(roomName: string): SpawnInfo {
+        return {
+            jobType:JobType.Miner,
+            spawnCreep:false,
+            spawnLevel:CreepTask.getSpawnLevel(roomName)
+        }
     }
     public addRequests(roomName: string): void {
         const room = Game.rooms[roomName];

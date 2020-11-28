@@ -16,8 +16,12 @@ export class BuildTaskRequest extends CreepTaskRequest {
 }
 @ITaskCatalog.register
 export class BuildTask extends CreepTask {
-    getSpawnInfo(): void {
-        throw new Error("Method not implemented.");
+    getSpawnInfo(roomName: string): SpawnInfo {
+        return {
+            jobType:JobType.Builder,
+            spawnCreep:false,
+            spawnLevel:CreepTask.getSpawnLevel(roomName)
+        }
     }
 
     image: string = "🚧";

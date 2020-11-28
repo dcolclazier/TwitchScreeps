@@ -17,11 +17,13 @@ export class RestockTaskRequest extends CreepTaskRequest {
 
 @ITaskCatalog.register
 export class RestockTask extends CreepTask {
-    getSpawnInfo(): void {
-        throw new Error("Method not implemented.");
+    getSpawnInfo(roomName: string): SpawnInfo {
+        return {
+            jobType:JobType.Janitor,
+            spawnCreep:false,
+            spawnLevel:CreepTask.getSpawnLevel(roomName)
+        }
     }
-
-
     type: TaskType = CreepTaskType.RestockTask;
     image: string = "🛒";
     currentRestockId: string | undefined = undefined;

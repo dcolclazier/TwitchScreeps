@@ -19,8 +19,12 @@ export class UpgradeTaskRequest extends CreepTaskRequest {
 }
 @ITaskCatalog.register
 export class UpgradeTask extends CreepTask {
-    getSpawnInfo(): void {
-        throw new Error("Method not implemented.");
+    getSpawnInfo(roomName: string): SpawnInfo {
+        return {
+            jobType:JobType.Upgrader,
+            spawnCreep:false,
+            spawnLevel:CreepTask.getSpawnLevel(roomName)
+        }
     }
     static getSpawnInfo(roomName: string) : SpawnInfo {
 
