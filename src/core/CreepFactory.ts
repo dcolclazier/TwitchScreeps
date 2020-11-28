@@ -46,17 +46,14 @@ export class CreepFactory {
 
 
     }
-    private spawnCreep(spawnId: Id<StructureSpawn>, info: SpawnInfo){
 
+    private spawnCreep(spawnId: Id<StructureSpawn>, jobType: JobType, spawnLevel: SpawnLevel): number {
 
-        if(!info.spawnCreep) return;
-
-
-        const creepTemplate = global.creepCatalog[info.spawnLevel][info.jobType];
+        const creepTemplate = global.creepCatalog[spawnLevel][jobType];
         const bodyParts = creepTemplate.bodyParts;
         const taskTypes = creepTemplate.taskTypes;
         const spawn = Game.getObjectById(spawnId) as StructureSpawn;
-        let creepName = `${spawn.room.name}_${info.jobType}${global.util.memory.getUniqueId()}_${info.spawnLevel}`;
+        let creepName = `${spawn.room.name}_${jobType}${global.util.memory.getUniqueId()}_${spawnLevel}`;
 
         let status: number | string = spawn.spawnCreep(bodyParts, creepName, {
             dryRun: true
@@ -65,7 +62,7 @@ export class CreepFactory {
         status = _.isString(status) ? OK : status;
         while (status === -3) {
             console.log("OMG OMG OMG YOURE UNIQUE ALGORITHM SUCKS!!!!!!!!!");
-            creepName = `${spawn.room.name}_${info.jobType}${global.util.memory.getUniqueId()}_${info.spawnLevel}`;
+            creepName = `${spawn.room.name}_${jobType}${global.util.memory.getUniqueId()}_${spawnLevel}`;
             status = spawn.spawnCreep(bodyParts, creepName, {
                 dryRun: true
             });
@@ -76,7 +73,7 @@ export class CreepFactory {
                 acceptedTaskTypes: taskTypes,
                 currentTaskId: "",
                 currentTaskStatus: "WAITING",
-                jobType: info.jobType
+                jobType: jobType
             };
             status = spawn.spawnCreep(bodyParts, creepName, {
                 memory: mem

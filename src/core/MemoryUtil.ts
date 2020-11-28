@@ -79,51 +79,61 @@ export class MemoryUtil
   }
 
 }
-
-global.taskCatalog = {
-  [CreepTaskType.BuildTask]:{
-    priority: 5,
-    creepsPerTask: 1
-  },
-  [CreepTaskType.MineTask]:{
-    priority: 5,
-    creepsPerTask: 1
-  },
-  [CreepTaskType.RestockTask]:{
-    priority: 5,
-    creepsPerTask: 1
-  },
-  [CreepTaskType.UpgradeTask]:{
-    priority: 5,
-    creepsPerTask: 2
-  }
-}
-
 global.creepCatalog = {
   [SpawnLevel.Level1]: {
       [JobType.Worker]: {
           bodyParts: [MOVE, CARRY, WORK, WORK],
           taskTypes: [CreepTaskType.BuildTask],
+          creepsPerTask: {
+              [CreepTaskType.BuildTask]: 0,
+              [CreepTaskType.MineTask]: 0,
+              [CreepTaskType.RestockTask]: 0,
+              [CreepTaskType.UpgradeTask]: 0
+          },
           maxPerRoom: 0
       },
       [JobType.Builder]: {
           bodyParts: [MOVE, CARRY, WORK, WORK],
           taskTypes: [CreepTaskType.BuildTask],
+          creepsPerTask: {
+              [CreepTaskType.BuildTask]: 1,
+              [CreepTaskType.MineTask]: 0,
+              [CreepTaskType.RestockTask]: 0,
+              [CreepTaskType.UpgradeTask]: 0
+          },
           maxPerRoom: 2
       },
       [JobType.Janitor]: {
           bodyParts: [MOVE, CARRY, CARRY],
           taskTypes: [CreepTaskType.RestockTask],
+          creepsPerTask: {
+              [CreepTaskType.BuildTask]: 0,
+              [CreepTaskType.MineTask]: 0,
+              [CreepTaskType.RestockTask]: 1,
+              [CreepTaskType.UpgradeTask]: 0
+          },
           maxPerRoom: 1
       },
       [JobType.Miner]: {
           bodyParts: [MOVE, WORK, WORK],
           taskTypes: [CreepTaskType.MineTask],
+          creepsPerTask: {
+              [CreepTaskType.BuildTask]: 0,
+              [CreepTaskType.MineTask]: 2,
+              [CreepTaskType.RestockTask]: 0,
+              [CreepTaskType.UpgradeTask]: 0
+          },
           maxPerRoom: 4
       },
       [JobType.Upgrader]: {
           bodyParts: [MOVE, CARRY, WORK, WORK],
           taskTypes: [CreepTaskType.BuildTask],
+          creepsPerTask: {
+              [CreepTaskType.BuildTask]: 0,
+              [CreepTaskType.MineTask]: 0,
+              [CreepTaskType.RestockTask]: 0,
+              [CreepTaskType.UpgradeTask]: 2
+          },
           maxPerRoom: 2
       }
 
@@ -132,26 +142,56 @@ global.creepCatalog = {
       [JobType.Worker]: {
           bodyParts: [MOVE, MOVE, CARRY, CARRY, WORK, WORK],
           taskTypes: [CreepTaskType.BuildTask],
+          creepsPerTask: {
+              [CreepTaskType.BuildTask]: 0,
+              [CreepTaskType.MineTask]: 0,
+              [CreepTaskType.RestockTask]: 0,
+              [CreepTaskType.UpgradeTask]: 0
+          },
           maxPerRoom: 0
       },
       [JobType.Builder]: {
           bodyParts: [MOVE, MOVE, CARRY, CARRY, WORK, WORK],
           taskTypes: [CreepTaskType.BuildTask],
+          creepsPerTask: {
+              [CreepTaskType.BuildTask]: 0,
+              [CreepTaskType.MineTask]: 0,
+              [CreepTaskType.RestockTask]: 0,
+              [CreepTaskType.UpgradeTask]: 0
+          },
           maxPerRoom:3
       },
       [JobType.Janitor]: {
           bodyParts: [MOVE, MOVE, CARRY, CARRY, CARRY, WORK],
           taskTypes: [CreepTaskType.RestockTask],
+          creepsPerTask: {
+              [CreepTaskType.BuildTask]: 0,
+              [CreepTaskType.MineTask]: 0,
+              [CreepTaskType.RestockTask]: 1,
+              [CreepTaskType.UpgradeTask]: 0
+          },
           maxPerRoom:3
       },
       [JobType.Miner]: {
           bodyParts: [MOVE, MOVE, WORK, WORK, WORK, WORK, WORK],
           taskTypes: [CreepTaskType.MineTask],
+          creepsPerTask: {
+              [CreepTaskType.BuildTask]: 0,
+              [CreepTaskType.MineTask]: 2,
+              [CreepTaskType.RestockTask]: 0,
+              [CreepTaskType.UpgradeTask]: 0
+          },
           maxPerRoom:4
       },
       [JobType.Upgrader]: {
           bodyParts: [MOVE, MOVE, CARRY, CARRY, WORK, WORK, WORK],
           taskTypes: [CreepTaskType.UpgradeTask],
+          creepsPerTask: {
+              [CreepTaskType.BuildTask]: 0,
+              [CreepTaskType.MineTask]: 0,
+              [CreepTaskType.RestockTask]: 0,
+              [CreepTaskType.UpgradeTask]: 3
+          },
           maxPerRoom:3
       }
   }
