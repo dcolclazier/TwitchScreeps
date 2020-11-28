@@ -14,26 +14,7 @@ export class MineTaskRequest extends CreepTaskRequest {
 }
 @ITaskCatalog.register
 export class MineTask extends CreepTask {
-    getSpawnInfo(roomName: string): SpawnInfo {
-        return {
-            jobType:JobType.Miner,
-            spawnCreep:false,
-            spawnLevel:CreepTask.getSpawnLevel(roomName)
-        }
-    }
-    public addRequests(roomName: string): void {
-        const room = Game.rooms[roomName];
-        if(room === (null || undefined)) return;
 
-        var mineTasks = global.taskManager.getTasks(roomName, CreepTaskType.MineTask) as CreepTaskRequest[];
-        var sources = room.find(FIND_SOURCES);
-        for(let sourceId in sources){
-            const source = sources[sourceId];
-            if(!_.any(mineTasks, t => t.targetId == source.id)){
-                global.taskManager.addTaskRequest(new MineTaskRequest(source.id, roomName, roomName))
-            }
-        }
-    }
 
     image: string = "⛏";
     type: TaskType = CreepTaskType.MineTask;
@@ -56,9 +37,22 @@ export class MineTask extends CreepTask {
     protected cooldown(creepName: string): void { }
 
 
-    public static getSpawnInfo(roomName: string) {
+    public getSpawnInfo(roomName: string) {
 
-        return this.spawnCreeps(roomName, JobType.Miner, CreepTaskType.MineTask, () => true);
+        return this._getSpawnInfo(roomName, JobType.Miner, CreepTaskType.MineTask, () => true);
+    }
+    public addRequests(roomName: string): void {
+        const room = Game.rooms[roomName];
+        if(room === (null || undefined)) return;
+
+        var mineTasks = global.taskManager.getTasks(roomName, CreepTaskType.MineTask) as CreepTaskRequest[];
+        var sources = room.find(FIND_SOURCES);
+        for(let sourceId in sources){
+            const source = sources[sourceId];
+            if(!_.any(mineTasks, t => t.targetId == source.id)){
+                global.taskManager.addTaskRequest(new MineTaskRequest(source.id, roomName, roomName))
+            }
+        }
     }
 
 }

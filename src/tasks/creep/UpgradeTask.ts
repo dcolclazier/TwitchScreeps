@@ -63,11 +63,7 @@ export class UpgradeTask extends CreepTask {
     protected cooldown(creepName: string): void { }
 
     public getSpawnInfo(roomName: string): SpawnInfo {
-        return {
-            jobType:JobType.Upgrader,
-            spawnCreep:false,
-            spawnLevel:CreepTask.getSpawnLevel(roomName)
-        }
+        return this._getSpawnInfo(roomName, JobType.Upgrader, this.type as CreepTaskType, () => true)
     }
 
     public addRequests(roomName: string) {

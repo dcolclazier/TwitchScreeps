@@ -1,3 +1,4 @@
+import { Governor } from "core/Governor";
 import TaskType, { CreepTaskType, JobType, SpawnLevel, TaskCategory } from "../../contract/types";
 import { CreepTaskRequest } from "./CreepTaskRequest";
 import { Task } from "./Task";
@@ -16,29 +17,14 @@ export abstract class CreepTask extends Task
     public abstract getSpawnInfo(roomName: string): SpawnInfo
 
     //doesnt need to live here - this is governor shit...
-    public static getSpawnLevel(roomName: string) : SpawnLevel{
 
-        var janitors = _.filter(Game.creeps, c=> c.room.name === roomName && c.memory?.jobType === JobType.Janitor);
-        var miners = _.filter(Game.creeps, c=> c.room.name === roomName && c.memory?.jobType === JobType.Miner);
 
-        var minerWorkParts = _.sum(miners, miner=> miner.getActiveBodyparts(WORK));
-
-        if(janitors.length === 0 || minerWorkParts < 1) return SpawnLevel.Level1;
-
-        var totalEnergy = Game.rooms[roomName].energyCapacityAvailable;
-        if(totalEnergy <= 300) return SpawnLevel.Level1;
-        else if(totalEnergy <= 600) return SpawnLevel.Level2;
-
-        //console.log("ERROR. Implement more spawn levels!");
-        return SpawnLevel.Level2;
-    }
-
-    protected static spawnCreeps(roomName: string, jobType: JobType, taskType: CreepTaskType, predicate: () => boolean) : SpawnInfo{
+    protected _getSpawnInfo(roomName: string, jobType: JobType, taskType: CreepTaskType, predicate: () => boolean) : SpawnInfo{
 
         let toSpawn : SpawnInfo = {
             jobType:jobType,
             spawnCreep:false,
-            spawnLevel:CreepTask.getSpawnLevel(roomName)
+            spawnLevel:Governor.getSpawnLevel(roomName)
         };
         var creeps = _.filter(Game.creeps, c=> c.room.name === roomName && c.name.split("_")[1] as JobType == jobType);
         const currentTasks = global.taskManager.getTasks(roomName, taskType) as CreepTaskRequest[];

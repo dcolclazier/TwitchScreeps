@@ -16,13 +16,7 @@ export class BuildTaskRequest extends CreepTaskRequest {
 }
 @ITaskCatalog.register
 export class BuildTask extends CreepTask {
-    getSpawnInfo(roomName: string): SpawnInfo {
-        return {
-            jobType:JobType.Builder,
-            spawnCreep:false,
-            spawnLevel:CreepTask.getSpawnLevel(roomName)
-        }
-    }
+
 
     image: string = "🚧";
     type: TaskType = CreepTaskType.BuildTask
@@ -101,9 +95,9 @@ export class BuildTask extends CreepTask {
           }
         }
     }
-    public static getSpawnInfo(roomName: string): SpawnInfo {
+    public getSpawnInfo(roomName: string): SpawnInfo {
 
-        return this.spawnCreeps(roomName, JobType.Builder, CreepTaskType.BuildTask, () => true);
+        return this._getSpawnInfo(roomName, JobType.Builder, CreepTaskType.BuildTask, () => true);
     }
 }
 

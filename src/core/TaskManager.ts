@@ -2,6 +2,7 @@ import { CreepTask } from "tasks/base/CreepTask";
 import { CreepTaskRequest } from "tasks/base/CreepTaskRequest";
 import TaskType, { CreepTaskType, TaskCategory } from "contract/types";
 import { ITaskCatalog } from "contract/ITaskCatalog";
+import { Governor } from "./Governor";
 // import { BuildTask, BuildTaskRequest } from "tasks/creep/BuildTask";
 // import { MineTask, MineTaskRequest } from "tasks/creep/MineTask";
 // import { RestockTask, RestockTaskRequest } from "tasks/creep/RestockTask";
@@ -88,7 +89,7 @@ export class TaskManager{
         }
         if(request.isFinished) return;
 
-        const spawnLevel = CreepTask.getSpawnLevel(roomName);
+        const spawnLevel = Governor.getSpawnLevel(roomName);
         const taskType =  request.type as CreepTaskType;
         const creepsPerTask = global.taskCatalog[taskType].creepsPerTask;
 
@@ -133,7 +134,6 @@ export class TaskManager{
             return test.type === request.type;
         });
         if(tasks.length === 0) return undefined;
-        console.log("yep, this works too: " + new tasks[0](request).type)
         return new tasks[0](request);
     }
 
@@ -142,7 +142,6 @@ export class TaskManager{
         const tasks = ITaskCatalog.GetImplementations();
         for(let id in tasks){
             var task = new tasks[id]() as CreepTask;
-            console.log(`yep, this works: ${task.type}`);
             task.addRequests(roomName);
         }
     }

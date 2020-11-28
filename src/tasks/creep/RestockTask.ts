@@ -17,28 +17,11 @@ export class RestockTaskRequest extends CreepTaskRequest {
 
 @ITaskCatalog.register
 export class RestockTask extends CreepTask {
-    getSpawnInfo(roomName: string): SpawnInfo {
-        return {
-            jobType:JobType.Janitor,
-            spawnCreep:false,
-            spawnLevel:CreepTask.getSpawnLevel(roomName)
-        }
-    }
+
     type: TaskType = CreepTaskType.RestockTask;
     image: string = "🛒";
     currentRestockId: string | undefined = undefined;
 
-    public addRequests(roomName: string): void {
-
-        const room = Game.rooms[roomName];
-        if(room?.controller === (null || undefined)) return;
-        var restockTasks = global.taskManager.getTasks(roomName, CreepTaskType.RestockTask) as CreepTaskRequest[];
-
-        if(!_.any(restockTasks)){
-            global.taskManager.addTaskRequest(new RestockTaskRequest(room.controller.id, roomName, roomName))
-        }
-
-    }
 
     protected prepare(creepName: string): void {
         const creep = Game.creeps[creepName];
@@ -101,12 +84,23 @@ export class RestockTask extends CreepTask {
     }
     protected cooldown(creepName: string): void {
     }
-    public static getSpawnInfo(roomName: string): SpawnInfo {
+    public getSpawnInfo(roomName: string): SpawnInfo {
 
-        return this.spawnCreeps(roomName, JobType.Janitor, CreepTaskType.RestockTask, () => true)
+        return this._getSpawnInfo(roomName, JobType.Janitor, CreepTaskType.RestockTask, () => true)
 
     }
 
+    public addRequests(roomName: string): void {
+
+        const room = Game.rooms[roomName];
+        if(room?.controller === (null || undefined)) return;
+        var restockTasks = global.taskManager.getTasks(roomName, CreepTaskType.RestockTask) as CreepTaskRequest[];
+
+        if(!_.any(restockTasks)){
+            global.taskManager.addTaskRequest(new RestockTaskRequest(room.controller.id, roomName, roomName))
+        }
+
+    }
 }
 
 RestockTask.name
