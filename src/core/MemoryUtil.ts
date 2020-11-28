@@ -1,6 +1,6 @@
 import { CreepTaskType, JobType, SpawnLevel } from "contract/types";
 
-export const MemoryVersion = 1
+export const MemoryVersion = 2
 export class MemoryUtil
 {
   public cleanupCreeps() : void {

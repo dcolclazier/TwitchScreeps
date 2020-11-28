@@ -16,30 +16,9 @@ export class BuildTaskRequest extends CreepTaskRequest {
 }
 @ITaskCatalog.register
 export class BuildTask extends CreepTask {
-    public addRequests(roomName: string): void {
-        const room = Game.rooms[roomName];
-        if(Utility.isNullOrUndefined(room)) return;
-
-        var constructionSites = room.find(FIND_CONSTRUCTION_SITES);
-        if(constructionSites.length > 0){
-          for(let siteId in constructionSites){
-            const site = constructionSites[siteId];
-            const buildTasks = global.taskManager.getTasks(roomName, CreepTaskType.BuildTask) as BuildTaskRequest[];
-
-            if(_.find(buildTasks, b => b.targetId === site.id) === undefined)
-            {
-              console.log("Adding a build task")
-              global.taskManager.addTaskRequest(new BuildTaskRequest(site.id, roomName, roomName));
-
-              //currentTasks.push(new BuildTaskRequest(site.id, roomName, roomName))
-            }
-          }
-        }
-    }
 
     image: string = "🚧";
     type: TaskType = CreepTaskType.BuildTask
-
 
     protected prepare(creepName: string): void {
 
@@ -96,27 +75,25 @@ export class BuildTask extends CreepTask {
         //Not used for this task
 
     }
-    // public static addRequests(roomName: string, creepsNeeded: number = 1): void {
 
-    //     const room = Game.rooms[roomName];
-    //     if(Utility.isNullOrUndefined(room)) return;
+    public addRequests(roomName: string): void {
+        const room = Game.rooms[roomName];
+        if(Utility.isNullOrUndefined(room)) return;
 
-    //     var constructionSites = room.find(FIND_CONSTRUCTION_SITES);
-    //     if(constructionSites.length > 0){
-    //       for(let siteId in constructionSites){
-    //         const site = constructionSites[siteId];
-    //         const buildTasks = global.taskManager.getTasks(roomName, CreepTaskType.BuildTask) as BuildTaskRequest[];
+        var constructionSites = room.find(FIND_CONSTRUCTION_SITES);
+        if(constructionSites.length > 0){
+          for(let siteId in constructionSites){
+            const site = constructionSites[siteId];
+            const buildTasks = global.taskManager.getTasks(roomName, CreepTaskType.BuildTask) as BuildTaskRequest[];
 
-    //         if(_.find(buildTasks, b => b.targetId === site.id) === undefined)
-    //         {
-    //           console.log("Adding a build task")
-    //           global.taskManager.addTaskRequest(new BuildTaskRequest(site.id, roomName, roomName, creepsNeeded));
-
-    //           //currentTasks.push(new BuildTaskRequest(site.id, roomName, roomName))
-    //         }
-    //       }
-    //     }
-    // }
+            if(_.find(buildTasks, b => b.targetId === site.id) === undefined)
+            {
+              console.log("Adding a build task")
+              global.taskManager.addTaskRequest(new BuildTaskRequest(site.id, roomName, roomName));
+            }
+          }
+        }
+    }
     public static getSpawnInfo(roomName: string): SpawnInfo {
 
         return this.spawnCreeps(roomName, JobType.Builder, CreepTaskType.BuildTask, () => true);

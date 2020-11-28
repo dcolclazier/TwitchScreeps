@@ -2,10 +2,6 @@ import { CreepTask } from "tasks/base/CreepTask";
 import { CreepTaskRequest } from "tasks/base/CreepTaskRequest";
 import TaskType, { CreepTaskType, TaskCategory } from "contract/types";
 import { ITaskCatalog } from "contract/ITaskCatalog";
-// import { BuildTask, BuildTaskRequest } from "tasks/creep/BuildTask";
-// import { MineTask, MineTaskRequest } from "tasks/creep/MineTask";
-// import { RestockTask, RestockTaskRequest } from "tasks/creep/RestockTask";
-// import { UpgradeTask, UpgradeTaskRequest } from "tasks/creep/UpgradeTask";
 
 export class TaskManager{
 
@@ -91,13 +87,7 @@ export class TaskManager{
         const spawnLevel = CreepTask.getSpawnLevel(roomName);
         const taskType =  request.type as CreepTaskType;
         const creepsPerTask = global.creepCatalog[spawnLevel][request.jobType].creepsPerTask[taskType];
-        // if(request.type == CreepTaskType.RestockTask){
 
-        //     console.log(spawnLevel);
-        //     console.log(taskType);
-        //     console.log(creepsPerTask);
-
-        // }
         if (request.creepsAssigned.length < creepsPerTask) {
 
             let assignmentsNeeded = creepsPerTask- request.creepsAssigned.length;
@@ -138,17 +128,9 @@ export class TaskManager{
             let test = new t(request) as ITask;
             return test.type === request.type;
         });
-        console.log(JSON.stringify(tasks));
         if(tasks.length === 0) return undefined;
+        // console.log("yep, this works too: " + new tasks[0](request).type)
         return new tasks[0](request);
-
-        // switch(request.type){
-        //     case CreepTaskType.BuildTask: return new BuildTask(request as BuildTaskRequest);
-        //     case CreepTaskType.MineTask: return new MineTask(request as MineTaskRequest);
-        //     case CreepTaskType.UpgradeTask: return new UpgradeTask(request as UpgradeTaskRequest);
-        //     case CreepTaskType.RestockTask: return new RestockTask(request as RestockTaskRequest);
-        // }
-        // return undefined
     }
 
     private addTaskRequests(roomName: string){
@@ -156,6 +138,7 @@ export class TaskManager{
         const tasks = ITaskCatalog.GetImplementations();
         for(let id in tasks){
             var task = new tasks[id]() as CreepTask;
+            // console.log(`yep, this works: ${task.type}`);
             task.addRequests(roomName);
         }
     }
