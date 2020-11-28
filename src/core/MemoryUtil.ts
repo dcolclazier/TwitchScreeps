@@ -1,4 +1,8 @@
 import { CreepTaskType, JobType, SpawnLevel } from "contract/types";
+import { BuildTask } from "tasks/creep/BuildTask";
+import { MineTask } from "tasks/creep/MineTask";
+import { RestockTask } from "tasks/creep/RestockTask";
+import { UpgradeTask } from "tasks/creep/UpgradeTask";
 
 export const MemoryVersion = 2
 export class MemoryUtil
@@ -16,6 +20,7 @@ export class MemoryUtil
   public clearMemory() : void {
   }
   public initialize(): void{
+    TaskInit.init();
     if(Memory.version === undefined || MemoryVersion != Memory.version)
     {
       console.log("Global reset!");
@@ -54,7 +59,7 @@ export class MemoryUtil
 
       const level = <SpawnLevel>(<number>+name.split("_")[3]);
       const creepMemory = <CreepMemory>{
-        acceptedTaskTypes: global.creepCatalog[level][type].taskTypes,
+        acceptedTaskTypes: global.creepCatalog[type][level].taskTypes,
         currentTaskId:"",
         currentTaskStatus:"WAITING",
         jobType:type
@@ -80,136 +85,98 @@ export class MemoryUtil
 
 }
 
+export class TaskInit{
+  static init() : void{
+      BuildTask.name;
+      RestockTask.name;
+      MineTask.name;
+      UpgradeTask.name;
+
+
+
+      //Only way I could figure out how to call the class decorators to add these to the ITaskCatalog... ugh.
+  }
+}
 
 global.taskCatalog = {
   [CreepTaskType.BuildTask]:{
     priority: 3,
+    creepsPerTask: 1
   },
   [CreepTaskType.MineTask]:{
     priority: 1,
+    creepsPerTask: 1
   },
   [CreepTaskType.RestockTask]:{
     priority: 2,
+    creepsPerTask: 1
   },
   [CreepTaskType.UpgradeTask]:{
     priority: 3,
+    creepsPerTask: 1
   }
 }
 
 global.creepCatalog = {
-  [SpawnLevel.Level1]: {
-      [JobType.Worker]: {
-          bodyParts: [MOVE, CARRY, WORK, WORK],
-          taskTypes: [CreepTaskType.BuildTask],
-          creepsPerTask: {
-              [CreepTaskType.BuildTask]: 0,
-              [CreepTaskType.MineTask]: 0,
-              [CreepTaskType.RestockTask]: 0,
-              [CreepTaskType.UpgradeTask]: 0
-          },
-          maxPerRoom: 0
-      },
-      [JobType.Builder]: {
-          bodyParts: [MOVE, CARRY, WORK, WORK],
-          taskTypes: [CreepTaskType.BuildTask],
-          creepsPerTask: {
-              [CreepTaskType.BuildTask]: 1,
-              [CreepTaskType.MineTask]: 0,
-              [CreepTaskType.RestockTask]: 0,
-              [CreepTaskType.UpgradeTask]: 0
-          },
-          maxPerRoom: 2
-      },
-      [JobType.Janitor]: {
-          bodyParts: [MOVE, CARRY, CARRY],
-          taskTypes: [CreepTaskType.RestockTask],
-          creepsPerTask: {
-              [CreepTaskType.BuildTask]: 0,
-              [CreepTaskType.MineTask]: 0,
-              [CreepTaskType.RestockTask]: 1,
-              [CreepTaskType.UpgradeTask]: 0
-          },
-          maxPerRoom: 1
-      },
-      [JobType.Miner]: {
-          bodyParts: [MOVE, WORK, WORK],
-          taskTypes: [CreepTaskType.MineTask],
-          creepsPerTask: {
-              [CreepTaskType.BuildTask]: 0,
-              [CreepTaskType.MineTask]: 2,
-              [CreepTaskType.RestockTask]: 0,
-              [CreepTaskType.UpgradeTask]: 0
-          },
-          maxPerRoom: 4
-      },
-      [JobType.Upgrader]: {
-          bodyParts: [MOVE, CARRY, WORK, WORK],
-          taskTypes: [CreepTaskType.BuildTask],
-          creepsPerTask: {
-              [CreepTaskType.BuildTask]: 0,
-              [CreepTaskType.MineTask]: 0,
-              [CreepTaskType.RestockTask]: 0,
-              [CreepTaskType.UpgradeTask]: 2
-          },
-          maxPerRoom: 2
-      }
-
+  [JobType.Worker]:
+  {
+    [SpawnLevel.Level1]: {
+      bodyParts: [MOVE, CARRY, WORK, WORK],
+      taskTypes: [CreepTaskType.BuildTask],
+      maxPerRoom: 0
+    },
+    [SpawnLevel.Level2]: {
+      bodyParts: [MOVE, MOVE, CARRY, CARRY, WORK, WORK],
+      taskTypes: [CreepTaskType.BuildTask],
+      maxPerRoom: 0
+    }
   },
-  [SpawnLevel.Level2]: {
-      [JobType.Worker]: {
-          bodyParts: [MOVE, MOVE, CARRY, CARRY, WORK, WORK],
-          taskTypes: [CreepTaskType.BuildTask],
-          creepsPerTask: {
-              [CreepTaskType.BuildTask]: 0,
-              [CreepTaskType.MineTask]: 0,
-              [CreepTaskType.RestockTask]: 0,
-              [CreepTaskType.UpgradeTask]: 0
-          },
-          maxPerRoom: 0
-      },
-      [JobType.Builder]: {
-          bodyParts: [MOVE, MOVE, CARRY, CARRY, WORK, WORK],
-          taskTypes: [CreepTaskType.BuildTask],
-          creepsPerTask: {
-              [CreepTaskType.BuildTask]: 0,
-              [CreepTaskType.MineTask]: 0,
-              [CreepTaskType.RestockTask]: 0,
-              [CreepTaskType.UpgradeTask]: 0
-          },
-          maxPerRoom:3
-      },
-      [JobType.Janitor]: {
-          bodyParts: [MOVE, MOVE, CARRY, CARRY, CARRY, WORK],
-          taskTypes: [CreepTaskType.RestockTask],
-          creepsPerTask: {
-              [CreepTaskType.BuildTask]: 0,
-              [CreepTaskType.MineTask]: 0,
-              [CreepTaskType.RestockTask]: 1,
-              [CreepTaskType.UpgradeTask]: 0
-          },
-          maxPerRoom:3
-      },
-      [JobType.Miner]: {
-          bodyParts: [MOVE, MOVE, WORK, WORK, WORK, WORK, WORK],
-          taskTypes: [CreepTaskType.MineTask],
-          creepsPerTask: {
-              [CreepTaskType.BuildTask]: 0,
-              [CreepTaskType.MineTask]: 2,
-              [CreepTaskType.RestockTask]: 0,
-              [CreepTaskType.UpgradeTask]: 0
-          },
-          maxPerRoom:4
-      },
-      [JobType.Upgrader]: {
-          bodyParts: [MOVE, MOVE, CARRY, CARRY, WORK, WORK, WORK],
-          taskTypes: [CreepTaskType.UpgradeTask],
-          creepsPerTask: {
-              [CreepTaskType.BuildTask]: 0,
-              [CreepTaskType.MineTask]: 0,
-              [CreepTaskType.RestockTask]: 0,
-              [CreepTaskType.UpgradeTask]: 3
-          },
-          maxPerRoom:3
-      }
+  [JobType.Janitor]:{
+    [SpawnLevel.Level1]: {
+      bodyParts: [MOVE, CARRY, CARRY],
+      taskTypes: [CreepTaskType.RestockTask],
+      maxPerRoom: 1
+    },
+    [SpawnLevel.Level2]: {
+      bodyParts: [MOVE, MOVE, CARRY, CARRY, CARRY, WORK],
+      taskTypes: [CreepTaskType.RestockTask],
+      maxPerRoom:3
+    }
+  },
+  [JobType.Miner]:{
+    [SpawnLevel.Level1]: {
+      bodyParts: [MOVE, WORK, WORK],
+      taskTypes: [CreepTaskType.MineTask],
+      maxPerRoom: 4
+    },
+    [SpawnLevel.Level2]: {
+      bodyParts: [MOVE, MOVE, WORK, WORK, WORK, WORK, WORK],
+      taskTypes: [CreepTaskType.MineTask],
+      maxPerRoom:4
+    }
+  },
+  [JobType.Upgrader]: {
+    [SpawnLevel.Level1]: {
+      bodyParts: [MOVE, CARRY, WORK, WORK],
+      taskTypes: [CreepTaskType.BuildTask],
+      maxPerRoom: 2
+    },
+    [SpawnLevel.Level2]: {
+      bodyParts: [MOVE, MOVE, CARRY, CARRY, WORK, WORK, WORK],
+      taskTypes: [CreepTaskType.UpgradeTask],
+      maxPerRoom:3
+    }
+  },
+  [JobType.Builder]: {
+    [SpawnLevel.Level1]: {
+      bodyParts: [MOVE, CARRY, WORK, WORK],
+      taskTypes: [CreepTaskType.BuildTask],
+      maxPerRoom: 2
+    },
+    [SpawnLevel.Level2]: {
+      bodyParts: [MOVE, MOVE, CARRY, CARRY, WORK, WORK],
+      taskTypes: [CreepTaskType.BuildTask],
+      maxPerRoom:3
+    }
   }
 }

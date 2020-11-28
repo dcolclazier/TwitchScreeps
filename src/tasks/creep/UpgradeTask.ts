@@ -3,7 +3,6 @@ import { CreepTaskRequest } from ".././base/CreepTaskRequest";
 import TaskType, { CreepTaskType, JobType } from "../../contract/types";
 import { ITaskCatalog } from "contract/ITaskCatalog";
 
-
 export class UpgradeTaskRequest extends CreepTaskRequest {
     jobType: JobType = JobType.Upgrader;
     type: TaskType = CreepTaskType.UpgradeTask;
@@ -17,34 +16,12 @@ export class UpgradeTaskRequest extends CreepTaskRequest {
 
     }
 }
+
 @ITaskCatalog.register
 export class UpgradeTask extends CreepTask {
-    getSpawnInfo(roomName: string): SpawnInfo {
-        return {
-            jobType:JobType.Upgrader,
-            spawnCreep:false,
-            spawnLevel:CreepTask.getSpawnLevel(roomName)
-        }
-    }
-    static getSpawnInfo(roomName: string) : SpawnInfo {
-
-        return this.spawnCreeps(roomName, JobType.Upgrader, CreepTaskType.UpgradeTask, () => true);
-    }
 
     image: string = "✨";
     type: TaskType = CreepTaskType.UpgradeTask;
-
-    public addRequests(roomName: string) {
-
-        const room = Game.rooms[roomName];
-        if(room?.controller === (null || undefined)) return;
-        var upgradeTasks = global.taskManager.getTasks(roomName, CreepTaskType.UpgradeTask) as CreepTaskRequest[];
-
-        if(!_.any(upgradeTasks)){
-            global.taskManager.addTaskRequest(new UpgradeTaskRequest(room.controller.id, roomName, roomName))
-        }
-    }
-
 
     protected prepare(creepName: string): void {
 
@@ -63,6 +40,7 @@ export class UpgradeTask extends CreepTask {
         }
 
     }
+
     protected work(creepName: string): void {
 
         if (creepName === "") return;
@@ -84,5 +62,22 @@ export class UpgradeTask extends CreepTask {
     }
     protected cooldown(creepName: string): void { }
 
-}
+    public getSpawnInfo(roomName: string): SpawnInfo {
+        return {
+            jobType:JobType.Upgrader,
+            spawnCreep:false,
+            spawnLevel:CreepTask.getSpawnLevel(roomName)
+        }
+    }
 
+    public addRequests(roomName: string) {
+
+        const room = Game.rooms[roomName];
+        if(room?.controller === (null || undefined)) return;
+        var upgradeTasks = global.taskManager.getTasks(roomName, CreepTaskType.UpgradeTask) as CreepTaskRequest[];
+
+        if(!_.any(upgradeTasks)){
+            global.taskManager.addTaskRequest(new UpgradeTaskRequest(room.controller.id, roomName, roomName))
+        }
+    }
+}

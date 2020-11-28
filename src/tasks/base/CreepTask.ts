@@ -42,8 +42,8 @@ export abstract class CreepTask extends Task
         };
         var creeps = _.filter(Game.creeps, c=> c.room.name === roomName && c.name.split("_")[1] as JobType == jobType);
         const currentTasks = global.taskManager.getTasks(roomName, taskType) as CreepTaskRequest[];
-        const maxPerRoom = global.creepCatalog[toSpawn.spawnLevel][jobType].maxPerRoom;
-        const creepsPerTask = global.creepCatalog[toSpawn.spawnLevel][jobType].creepsPerTask[taskType];
+        const maxPerRoom = global.creepCatalog[jobType][toSpawn.spawnLevel].maxPerRoom;
+        const creepsPerTask = global.taskCatalog[taskType].creepsPerTask;
         const currentCreepCount = creeps.length;
 
         if(currentCreepCount >= maxPerRoom) return toSpawn;

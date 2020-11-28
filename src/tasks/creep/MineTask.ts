@@ -63,3 +63,4 @@ export class MineTask extends CreepTask {
 
 }
 
+MineTask.name

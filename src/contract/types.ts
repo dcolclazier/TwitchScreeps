@@ -13,13 +13,14 @@ export enum JobType {
     Janitor = "Janitor"
 }
 
-
 export enum CreepTaskType {
     MineTask = "MineTask",
     UpgradeTask = "UpgradeTask",
     BuildTask = "BuildTask",
     RestockTask = "RestockTask",
 }
+
+
 
 export enum StructureTaskType{
 }

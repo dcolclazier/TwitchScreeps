@@ -36,10 +36,11 @@ declare class TaskManager{
   public runTasks(roomName:string) : void;
 }
 declare interface ITaskInformation{
-  priority: number
+  priority: number,
+  creepsPerTask: number
 }
 type TaskCatalog = Record<import("./contract/types").TaskType, ITaskInformation>
-type CreepCatalog = Record<import("./contract/types").SpawnLevel, Record<import("./contract/types").JobType, ICreepTemplate>>
+type CreepCatalog = Record<import("./contract/types").JobType, Record<import("./contract/types").SpawnLevel, ICreepTemplate>>
 
 type IsCreepMemory = { acceptedTaskTypes: import("./contract/types").TaskType[] }
 type HasPos = { pos: RoomPosition };

@@ -109,3 +109,4 @@ export class RestockTask extends CreepTask {
 
 }
 
+RestockTask.name
