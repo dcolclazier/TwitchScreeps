@@ -1,4 +1,3 @@
-import { Console } from "console";
 import { JobType, SpawnLevel } from "contract/types";
 import { Logger } from "utils/Logger";
 import { CreepFactory } from "./CreepFactory";

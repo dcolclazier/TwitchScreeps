@@ -107,7 +107,7 @@ export class TaskInit{
         creepsPerTask: {
           [JobType.Janitor]:0,
           [JobType.Miner]:0,
-          [JobType.Upgrader]:3,
+          [JobType.Upgrader]:4,
           [JobType.Worker]:0,
           [JobType.Builder]:0
         },
@@ -137,7 +137,7 @@ export class TaskInit{
         maxPerRoom: 1
       },
       [SpawnLevel.Level2]: {
-        bodyParts: [MOVE, MOVE, MOVE, CARRY, CARRY, WORK],
+        bodyParts: [MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, CARRY],
         taskTypes: [CreepTaskType.RestockTask],
         maxPerRoom:3
       }
@@ -163,7 +163,7 @@ export class TaskInit{
       [SpawnLevel.Level2]: {
         bodyParts: [MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, WORK, WORK],
         taskTypes: [CreepTaskType.UpgradeTask],
-        maxPerRoom:3
+        maxPerRoom:4
       }
     },
     [JobType.Builder]: {

@@ -22,13 +22,8 @@ export class RoomUtil {
         const creep = Game.creeps[creepName];
         if (creep === undefined || creep === null) return false;
 
-        var resourcePiles = creep.room.find(FIND_DROPPED_RESOURCES)
-          .filter(resource => resource != (undefined || null)
-                    && resource.amount > 100
-                    && resource.resourceType === resourceType);
-        if (resourcePiles.length === 0) return false;
-
-        var closest = _.first(_.sortBy(resourcePiles, s => s.amount / creep.pos.getRangeTo(s.pos)).reverse());
+        const resourcePiles = _.sortBy(this.getResourcePiles(creep.room.name, resourceType), s => s.amount / creep.pos.getRangeTo(s.pos)).reverse();
+        var closest = _.first(resourcePiles);
 
         var result = creep.pickup(closest)
         if (result === ERR_NOT_IN_RANGE) {
@@ -37,6 +32,14 @@ export class RoomUtil {
         return true;
 
 
+    }
+
+    public getResourcePiles(roomName: string, resourceType: ResourceConstant): Resource<ResourceConstant>[]{
+        const resourcePiles =Game.rooms[roomName].find(FIND_DROPPED_RESOURCES)
+            .filter(resource => resource != (undefined || null)
+                    && resource.amount > 100
+                    && resource.resourceType === resourceType);
+        return resourcePiles;
     }
 
     public getRestockables(roomName: string) : AnyOwnedStructure[]{
