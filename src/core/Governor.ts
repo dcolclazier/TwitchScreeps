@@ -1,4 +1,4 @@
-import { JobType, SpawnLevel } from "contract/types";
+import { JobType, SpawnLevel } from "core/types";
 import { Logger } from "utils/Logger";
 import { CreepFactory } from "./CreepFactory";
 

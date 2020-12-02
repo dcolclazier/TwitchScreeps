@@ -1,12 +1,12 @@
-import { CreepTask } from ".././base/CreepTask";
-import { CreepTaskRequest } from ".././base/CreepTaskRequest";
-import TaskType, { CreepTaskType } from "../../contract/types";
-import { ITaskCatalog as ITaskCatalog } from "contract/ITaskCatalog";
+import { CreepTask } from "tasks/base/CreepTask";
+import { CreepTaskRequest } from "tasks/model/CreepTaskRequest";
+import { CreepTaskType } from "core/types";
+import { TaskFactory as TaskFactory } from "core/TaskFactory";
 import { Logger } from "utils/Logger";
 
 export class RestockTaskRequest extends CreepTaskRequest {
 
-    type: TaskType = CreepTaskType.RestockTask;
+    type: CreepTaskType = CreepTaskType.RestockTask;
     usesTargetId: boolean = false;
 
     constructor(resourceLocationId: any, originatingRoom: string, targetRoom: string) {
@@ -15,10 +15,10 @@ export class RestockTaskRequest extends CreepTaskRequest {
     }
 }
 
-@ITaskCatalog.register
+@TaskFactory.register
 export class RestockTask extends CreepTask {
 
-    type: TaskType = CreepTaskType.RestockTask;
+    type: CreepTaskType = CreepTaskType.RestockTask;
     image: string = "🛒";
     currentRestockId: string | undefined = undefined;
 
@@ -34,13 +34,13 @@ export class RestockTask extends CreepTask {
             return;
         }
 
-        const pickedUp = global.util.room.fillup(creepName, RESOURCE_ENERGY, true);
+        global.util.room.fillup(creepName, RESOURCE_ENERGY, false);
 
-        if (creep.store.getFreeCapacity() === 0
-            || creep.store.getFreeCapacity() != 0 && !pickedUp) {
+        if(creep.store.getFreeCapacity() === 0){
             creep.memory.currentTaskStatus = "WORKING";
-            return;
         }
+
+        Logger.LogTrace(`In ${CreepTaskType[this.type]}: ${creepName} free capacity: ${creep.store.getFreeCapacity() }`);
 
     }
 
@@ -55,7 +55,9 @@ export class RestockTask extends CreepTask {
             this.currentRestockId = this.getNextRestockId(creepName);
             if (this.currentRestockId === undefined) {
                 creep.memory.currentTaskStatus = "DONE";
+                return;
             }
+            // Logger.LogDebug("Restock ID: " + this.currentRestockId);
         }
         if(creep.store.getUsedCapacity() == 0){
             creep.memory.currentTaskStatus = "PREPARING";
@@ -93,18 +95,21 @@ export class RestockTask extends CreepTask {
         }
     }
 
-    private getNextRestockId(creepName: string): string {
+    private getNextRestockId(creepName: string): string | undefined {
 
         const creep = Game.creeps[creepName];
         const restockables = global.util.room.getRestockables(creep.room.name)
             .sort((structureA, structureB) => creep.pos.getRangeTo(structureA) - creep.pos.getRangeTo(structureB));
 
         if (restockables.length === 0)
-            return "";
+            return undefined;
         else {
             const id = restockables[0].id;
-            return id === undefined ? "" : id;
+            return id === undefined ? undefined : id;
         }
     }
 
+    canAssign(workerId: string): boolean {
+        return true;
+    }
 }

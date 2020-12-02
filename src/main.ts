@@ -1,15 +1,15 @@
 import { ErrorMapper } from "utils/ErrorMapper";
-import { TaskManager } from "core/TaskManager";
-import { Utility } from "core/Utility";
+import { TaskManager } from "tasks/base/TaskManager";
+import { Utility } from "utils/Utility";
 import { Governor } from "core/Governor";
 import { Logger, LogLevel } from "utils/Logger";
 
 global.util = new Utility();
 global.owner = "Nerdtastic";
 global.taskManager = new TaskManager();
+ //STILL NEED TO HANDLE REGISTERING NEW BUILDINGS...
 
-
-Logger.logLevel = LogLevel.INFO;
+Logger.logLevel = LogLevel.TRACE;
 function main(){
 
   global.util.memory.initialize();

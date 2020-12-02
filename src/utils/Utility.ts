@@ -1,5 +1,5 @@
-import {RoomUtil} from "core/RoomUtil"
-import {MemoryUtil} from "core/MemoryUtil"
+import {MemoryUtil} from "memory/MemoryUtil"
+import {RoomUtil} from "./RoomUtil";
 export class Utility implements IUtil {
     public room: RoomUtil = new RoomUtil();
     public memory: MemoryUtil = new MemoryUtil();

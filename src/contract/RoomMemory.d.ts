@@ -1,5 +1,0 @@
-interface RoomMemory{
-
-    initialized: boolean
-}
-

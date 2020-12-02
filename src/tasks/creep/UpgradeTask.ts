@@ -1,12 +1,12 @@
-import { CreepTask } from ".././base/CreepTask";
-import { CreepTaskRequest } from ".././base/CreepTaskRequest";
-import TaskType, { CreepTaskType } from "../../contract/types";
-import { ITaskCatalog } from "contract/ITaskCatalog";
+import { CreepTask } from "tasks/base/CreepTask";
+import { CreepTaskType } from "core/types";
+import { TaskFactory } from "core/TaskFactory";
 import { Logger } from "utils/Logger";
+import { CreepTaskRequest } from "tasks/model/CreepTaskRequest";
 
 export class UpgradeTaskRequest extends CreepTaskRequest {
 
-    type: TaskType = CreepTaskType.UpgradeTask;
+    type: CreepTaskType = CreepTaskType.UpgradeTask;
     usesTargetId: boolean = true;
     getTask(): ICreepTask {
         return new UpgradeTask(this);
@@ -18,38 +18,36 @@ export class UpgradeTaskRequest extends CreepTaskRequest {
     }
 }
 
-@ITaskCatalog.register
+@TaskFactory.register
 export class UpgradeTask extends CreepTask {
 
     image: string = "✨";
-    type: TaskType = CreepTaskType.UpgradeTask;
+    type: CreepTaskType = CreepTaskType.UpgradeTask;
 
     protected prepare(creepName: string): void {
 
         const creep = Game.creeps[creepName];
-        if (creep.memory.currentTaskStatus != "PREPARING")
-            return;
+        if (creep.memory.currentTaskStatus != "PREPARING") return;
 
-        //creep.memory.currentTaskStatus = "WORKING";
-        global.util.room.fillup(creep.name, RESOURCE_ENERGY);
+        global.util.room.fillup(creepName, RESOURCE_ENERGY, false);
 
-
-        if (creep.store.getFreeCapacity() == 0)
-        {
+        if(creep.store.getFreeCapacity() == 0){
             creep.memory.currentTaskStatus = "WORKING";
-            return;
         }
+
+        Logger.LogTrace(`In ${CreepTaskType[this.type]}: ${creepName} free capacity: ${creep.store.getFreeCapacity() }`);
 
     }
 
     protected work(creepName: string): void {
 
-        if (creepName === "") return;
 
         const creep = Game.creeps[creepName];
         if (creep.memory.currentTaskStatus != "WORKING") return;
 
         //slightly inefficient
+
+        if(this.request.targetId === undefined) return;
         const controller = Game.getObjectById(this.request.targetId) as StructureController;
 
         const actionResult = creep.upgradeController(controller);
@@ -81,5 +79,8 @@ export class UpgradeTask extends CreepTask {
             Logger.LogTrace(`Adding ${this.type} task to room ${roomName}`);
             global.taskManager.addTaskRequest(new UpgradeTaskRequest(room.controller.id, roomName, roomName))
         }
+    }
+    canAssign(workerId: string): boolean {
+        return true;
     }
 }

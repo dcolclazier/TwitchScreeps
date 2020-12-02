@@ -1,26 +1,27 @@
 import { CreepTask } from "../base/CreepTask";
-import { CreepTaskRequest } from "../base/CreepTaskRequest";
-import TaskType, { CreepTaskType, JobType } from "../../contract/types";
-import { ITaskCatalog } from "contract/ITaskCatalog";
+import { CreepTaskRequest } from "../model/CreepTaskRequest";
+import TaskType, { CreepTaskType } from "../../core/types";
 import { Logger } from "utils/Logger";
+import { TaskFactory } from "core/TaskFactory";
 
 export class BuildTaskRequest extends CreepTaskRequest {
 
-    creepsNeeded: number = 1;
-    type: TaskType = CreepTaskType.BuildTask;
+    type: CreepTaskType = CreepTaskType.BuildTask;
     usesTargetId: boolean = true;
 
     constructor(constructionSiteId: Id<ConstructionSite>, originatingRoom: string, targetRoom: string) {
         super(originatingRoom, targetRoom, constructionSiteId);
-
     }
 }
 
-@ITaskCatalog.register
+@TaskFactory.register
 export class BuildTask extends CreepTask {
+    canAssign(taskType: TaskType): boolean {
+        return true;
+    }
 
     image: string = "🚧";
-    type: TaskType = CreepTaskType.BuildTask
+    type: CreepTaskType = CreepTaskType.BuildTask
 
     protected prepare(creepName: string): void {
 
@@ -28,6 +29,7 @@ export class BuildTask extends CreepTask {
         if (creep.memory.currentTaskStatus != "PREPARING")
             return;
 
+        if(this.request.targetId === undefined) return;
         const site = Game.getObjectById(this.request.targetId) as ConstructionSite;
         var energyNeeded = site.progressTotal;
         if(energyNeeded === undefined || energyNeeded == 0) {
@@ -41,23 +43,23 @@ export class BuildTask extends CreepTask {
         }
 
         //go to a storage location, fill up on the resource required to build the thing
-        global.util.room.fillup(creep.name, RESOURCE_ENERGY);
+        global.util.room.fillup(creepName, RESOURCE_ENERGY, false);
 
-        if(creep.store.getUsedCapacity(RESOURCE_ENERGY) >= energyNeeded
-            || creep.store.getFreeCapacity() == 0)
-            {
-                creep.memory.currentTaskStatus = "WORKING";
-                return;
-            }
+        if(creep.store.getFreeCapacity() >= energyNeeded){
+            creep.memory.currentTaskStatus = "WORKING";
+        }
+
+        Logger.LogTrace(`In ${CreepTaskType[this.type]}: ${creepName} free capacity: ${creep.store.getFreeCapacity() }`);
 
     }
 
+
     protected work(creepName: string): void {
 
-        if (creepName === "") return;
         const creep = Game.creeps[creepName];
         if(creep.memory.currentTaskStatus != "WORKING") return;
 
+        if(this.request.targetId === undefined) return;
         const site = Game.getObjectById(this.request.targetId) as ConstructionSite;
 
         if(site === (undefined || null) || site.progressTotal === 0){
@@ -103,6 +105,4 @@ export class BuildTask extends CreepTask {
         }
     }
 }
-
-
 

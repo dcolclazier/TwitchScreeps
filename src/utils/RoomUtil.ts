@@ -1,20 +1,38 @@
+import { Logger } from "utils/Logger";
+
 export class RoomUtil {
 
-    public fillup(creepName: string, resourceType: ResourceConstant, cleanup: boolean = false) : boolean{
+    public fillup(creepName: string, resourceType: ResourceConstant, cleanup: boolean = false){
 
+      //shitty - make range based at least...
         if(cleanup){
-          if(this.collectFromDroppedResource(creepName, resourceType)) return true;
+          if(this.collectFromDroppedResource(creepName, resourceType)) return;
           //if(this.collectFromRuin(creepName, resourceType)) return;
           //if(this.collectFromTombstone(creepName, resourceType)) return;
         }
         else{
-          if(this.collectFromDroppedResource(creepName, resourceType)) return true;
+          if(this.collectFromDroppedResource(creepName, resourceType)) return;
           //if(this.collectFromRuin(creepName, resourceType)) return;
           //if(this.collectFromTombstone(creepName, resourceType)) return;
-          //if(this.collectFromStorage(creepName, resourceType)) return;
+          if(this.collectFromStorage(creepName, resourceType)) return;
         }
-        return false;
+        return;
 
+    }
+    private collectFromStorage(creepName: string, resourceType: ResourceConstant){
+        const creep = Game.creeps[creepName];
+        if (creep === undefined || creep === null) return false;
+
+        const storage = Game.rooms[creep.room.name].storage
+        if(storage === null || storage === undefined) return false;
+
+        var result = creep.withdraw(storage, resourceType)
+        if (result === ERR_NOT_IN_RANGE) {
+          creep.moveTo(storage);
+          return true;
+        }
+        Logger.LogTrace(`${creepName} couldn't pick up ${resourceType} : ${result}`)
+        return false;
     }
 
     private collectFromDroppedResource(creepName: string, resourceType: ResourceConstant): boolean {
@@ -28,16 +46,16 @@ export class RoomUtil {
         var result = creep.pickup(closest)
         if (result === ERR_NOT_IN_RANGE) {
           creep.moveTo(closest);
+          return true;
         }
-        return true;
-
-
+        Logger.LogTrace(`${creepName} couldn't pick up ${resourceType} : ${result}`)
+        return false;
     }
 
     public getResourcePiles(roomName: string, resourceType: ResourceConstant): Resource<ResourceConstant>[]{
         const resourcePiles =Game.rooms[roomName].find(FIND_DROPPED_RESOURCES)
             .filter(resource => resource != (undefined || null)
-                    && resource.amount > 100
+                    && resource.amount > 500
                     && resource.resourceType === resourceType);
         return resourcePiles;
     }

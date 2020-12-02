@@ -1,8 +1,8 @@
-import { JobType, SpawnLevel, TaskCategory } from "contract/types";
-import { ITaskCatalog } from "contract/ITaskCatalog";
+import { CreepTaskType, JobType, SpawnLevel, TaskCategory } from "core/types";
 import { CreepTask } from "tasks/base/CreepTask";
 import { Governor } from "./Governor";
 import { Logger } from "utils/Logger";
+import { TaskFactory } from "./TaskFactory";
 
 export class CreepFactory {
 
@@ -25,14 +25,13 @@ export class CreepFactory {
             return;
         const roomName = spawn.room.name;
         let creepTasks = [];
-        const tasks = ITaskCatalog.GetImplementations();
+        const tasks = TaskFactory.getHandlers();
         for(let id in tasks){
-            var task = new tasks[id]();
+            var task = tasks[id];
             if(task.category === TaskCategory.Creep) creepTasks.push(task);
         }
         const spawnLevel = Governor.getSpawnLevel(roomName);
-
-        let sorted = _.sortBy(creepTasks, task => global.taskCatalog[task.type][spawnLevel].priority);
+        let sorted = _.sortBy(creepTasks, task => global.creepTaskCatalog[<CreepTaskType>task.type][spawnLevel].priority);
         for(let id in sorted){
             let task = sorted[id] as CreepTask;
             Logger.LogTrace(`Checking spawns for ${task.type} at ${spawnLevel} in room ${roomName}`);

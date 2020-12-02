@@ -1,28 +1,25 @@
 import { Governor } from "core/Governor";
-import { Logger } from "utils/Logger";
-import TaskType, { CreepTaskType, JobType, SpawnLevel, TaskCategory } from "../../contract/types";
-import { CreepTaskRequest } from "./CreepTaskRequest";
+import { CreepTaskType, JobType, TaskCategory } from "../../core/types";
+import { CreepTaskRequest } from "../model/CreepTaskRequest";
 import { Task } from "./Task";
 
 export abstract class CreepTask extends Task
 {
-    request: CreepTaskRequest;
     category: TaskCategory = TaskCategory.Creep;
 
-    abstract type: TaskType;
+    abstract type: CreepTaskType;
     abstract image: string;
-    // abstract acceptedJobTypes: JobType[]
 
     protected abstract work(creepName: string): void
     protected abstract prepare(creepName: string): void
     protected abstract cooldown(creepName: string): void
     public abstract getSpawnInfo(roomName: string): SpawnInfo[]
 
-    protected _getSpawnInfo(roomName: string, taskType: TaskType, predicate: () => boolean) : SpawnInfo[]{
+    protected _getSpawnInfo(roomName: string, taskType: CreepTaskType, predicate: () => boolean) : SpawnInfo[]{
 
         const toReturn : SpawnInfo[] = [];
         const spawnLevel = Governor.getSpawnLevel(roomName);
-        const jobTypes = global.taskCatalog[taskType][spawnLevel].acceptedJobTypes;
+        const jobTypes = global.creepTaskCatalog[taskType][spawnLevel].acceptedJobTypes;
         for(let id in jobTypes){
             const jobType = jobTypes[id];
             const spawnInfo : SpawnInfo = {
@@ -32,7 +29,7 @@ export abstract class CreepTask extends Task
             };
             const creeps = _.filter(Game.creeps, c=> c.room.name === roomName && c.name.split("_")[1] as JobType == jobType);
             const currentTasks = global.taskManager.getTasks(roomName, taskType) as CreepTaskRequest[];
-            const creepsPerTask = global.taskCatalog[taskType][spawnInfo.spawnLevel].creepsPerTask[jobType];
+            const creepsPerTask = global.creepTaskCatalog[taskType][spawnInfo.spawnLevel].creepsPerTask[jobType];
 
             if(creeps.length >= global.creepCatalog[jobType][spawnInfo.spawnLevel].maxPerRoom) {
                 toReturn.push(spawnInfo);
@@ -52,29 +49,20 @@ export abstract class CreepTask extends Task
         }
         return toReturn;
     }
-    protected validateOwnedRoom(roomName: string) : Room | undefined{
-        const room = Game.rooms[roomName];
-        if(room?.controller === (null || undefined)) {
-            Logger.LogWarning(`Tried to add a ${this.type} task for an unowned room.. enable if you need to.`)
-            return undefined;
-        }
 
-        if(room.controller.owner?.username != global.owner){
-            Logger.LogTrace(`Tried to add ${this.type} tasks for a non-owned room... enable if you need to`);
-            return undefined;
-        }
-        return room;
-    }
     public run() : void {
 
-        for(let id in this.request.creepsAssigned){
+        const creepRequest = this.request as CreepTaskRequest;
+        for(let id in creepRequest.creepsAssigned){
 
-            const creep = Game.creeps[this.request.creepsAssigned[id]];
+            const creep = Game.creeps[creepRequest.creepsAssigned[id]];
             if(creep === undefined || creep === null) continue;
             if(creep.spawning) continue;
 
+
+            if(this.request.targetId === undefined) return;
             var target = Game.getObjectById(this.request.targetId);
-            if(target === null && this.request.usesTargetId){
+            if(target === null && creepRequest.usesTargetId){
                 this.finish();
                 return;
             }
@@ -90,19 +78,20 @@ export abstract class CreepTask extends Task
     }
 
     protected finish(): void{
+
+        const creepRequest = this.request as CreepTaskRequest;
         this.request.isFinished = true;
-        for(let creepName of this.request.creepsAssigned){
+        for(let creepName of creepRequest.creepsAssigned){
             const creep = Game.creeps[creepName];
             if(creep !== undefined){
                 creep.memory.currentTaskId = "";
                 creep.memory.currentTaskStatus = "WAITING"
             }
         }
-        this.request.creepsAssigned = [];
+        creepRequest.creepsAssigned = [];
     }
     constructor(taskRequest: CreepTaskRequest){
-        super();
-        this.request = taskRequest;
+        super(taskRequest);
     }
 
 }

@@ -4,7 +4,6 @@ export enum TaskCategory{
     Structure = "Structure"
 }
 
-
 export enum JobType {
     Worker = "Worker",
     Miner = "Miner",
@@ -18,13 +17,19 @@ export enum CreepTaskType {
     UpgradeTask = "UpgradeTask",
     BuildTask = "BuildTask",
     RestockTask = "RestockTask",
+    FillTowersTask = "FillTowersTask",
+    FillStorageTask = "FillStorageTask"
 }
-
-
-
-export enum StructureTaskType{
+export enum LinkType{
+    Harvest = "Harvest",
+    Storage = "Storage",
+    Edge= "Edge"
 }
-
+export enum StructureTaskType {
+    DefendRoomTask = "DefendRoomTask",
+    TransferEnergyLinkTask = "TransferEnergyLinkTask",
+    UpgradeRamparts = "UpgradeRamparts"
+}
 
 export enum SpawnLevel {
     Level1 = 1,

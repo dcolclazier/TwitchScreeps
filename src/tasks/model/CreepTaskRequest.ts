@@ -1,17 +1,16 @@
-import TaskType, { JobType, TaskCategory } from "../../contract/types";
+import TaskType, { CreepTaskType, TaskCategory } from "../../core/types";
 
 
 export abstract class CreepTaskRequest implements ITaskRequest {
     category: TaskCategory = TaskCategory.Creep;
     id: string = global.util.getUniqueId();
-    targetRoom: string = "";
-    originatingRoom: string = "";
+    targetRoom: string;
     creepsAssigned: string[] = [];
+    originatingRoom: string;
     targetId: Id<RoomObject>;
     isFinished: boolean = false;
     abstract usesTargetId: boolean;
-    abstract type: TaskType;
-    // abstract acceptedJobTypes: JobType[]
+    abstract type: CreepTaskType;
 
     constructor(originatingRoom: string, targetRoom: string, targetId: Id<RoomObject>) {
         this.originatingRoom = originatingRoom;
@@ -19,3 +18,6 @@ export abstract class CreepTaskRequest implements ITaskRequest {
         this.targetId = targetId;
     }
 }
+
+
+

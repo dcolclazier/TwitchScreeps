@@ -1,0 +1,47 @@
+import { StructureTaskType } from "../../contract/types";
+import { ITaskCatalog } from "contract/ITaskCatalog";
+import { Logger } from "utils/Logger";
+import { StructureTaskRequest } from "tasks/base/StructureTaskRequest";
+import { StructureTask } from "tasks/base/StructureTask";
+
+
+export class FILLMEIN extends StructureTaskRequest{
+    structureType: StructureConstant =
+    usesTargetId: boolean = false;
+    type: StructureTaskType =
+
+    constructor(towerId: Id<FILLMEIN>,targetRoom: string){
+        super(targetRoom, towerId);
+    }
+
+}
+@ITaskCatalog.register
+export class FILLMEIN extends StructureTask {
+
+    public type: StructureTaskType =
+
+    protected prepare(structureId: string): void {
+        const structureRequest = this.request as StructureTaskRequest;
+
+        structureRequest.currentTaskStatus = "WORKING";
+    }
+
+    protected work(structureId: string): void {
+
+
+    }
+
+    protected cooldown(structureId: string): void {
+    }
+
+
+    public addRequests(roomName: string): void {
+
+
+
+
+        //global.taskManager.addTaskRequest();
+
+    }
+
+}
