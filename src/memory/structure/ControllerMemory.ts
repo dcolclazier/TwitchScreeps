@@ -5,19 +5,19 @@ import { Logger } from "utils/Logger";
 import { StructureMemoryHandler } from "memory/base/MemoryHandler";
 
 @MemoryHandlerFactory.register
-export class SpawnMemoryHandler implements StructureMemoryHandler{
-    memoryObjectType: StructureConstant = STRUCTURE_SPAWN;
+export class ControllerMemoryHandler implements StructureMemoryHandler{
+    memoryObjectType: StructureConstant = STRUCTURE_CONTROLLER;
     registerMemory(roomName: string, id: string): void {
-        const memory = new SpawnMemory(id as Id<StructureSpawn>);
-        Logger.LogDebug(`Registering memory for spawn ${id}`);
+        const memory = new ControllerMemory(id as Id<StructureController>);
+        
         Memory.structures[roomName][this.memoryObjectType][id] = memory;
     }
 }
-export class SpawnMemory extends StructureMemory<StructureSpawn> {
+export class ControllerMemory extends StructureMemory<StructureController> {
     acceptedTaskTypes: TaskType[] = [];
-    structureType: StructureConstant = STRUCTURE_SPAWN;
+    structureType: StructureConstant = STRUCTURE_CONTROLLER;
 
-    constructor(id: Id<StructureSpawn>) {
+    constructor(id: Id<StructureController>) {
         super(id);
     }
 

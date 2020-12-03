@@ -1,4 +1,4 @@
-import {MemoryUtil} from "memory/MemoryUtil"
+import {MemoryUtil} from "utils/MemoryUtil"
 import {RoomUtil} from "./RoomUtil";
 export class Utility implements IUtil {
     public room: RoomUtil = new RoomUtil();

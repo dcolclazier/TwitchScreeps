@@ -8,6 +8,7 @@ declare namespace NodeJS {
   interface Global {
     // log: any;
     util: IUtil
+    memoryVersion: number
     taskManager: TaskManager
     owner: string
     creepCatalog: CreepCatalog
@@ -18,6 +19,20 @@ declare namespace NodeJS {
 interface ICreepTask extends ITask
 {
     image: string;
+}
+
+interface IMemoryHandler{
+  registerMemory(roomName: string, id: string): void
+  memoryObjectType: MemoryObjectConstant
+}
+
+
+interface IStructureMemory{
+  acceptedTaskTypes: import("core/types").TaskType[];
+  structureType: StructureConstant;
+  currentTaskId: string;
+  currentTaskStatus: TaskStatus;
+  id: string
 }
 declare class RoomUtil {
     public fillup(creepName: string, resourceType: ResourceConstant, cleanup?: boolean): void

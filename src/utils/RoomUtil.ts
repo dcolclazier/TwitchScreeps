@@ -9,9 +9,10 @@ export class RoomUtil {
           if(this.collectFromDroppedResource(creepName, resourceType)) return;
           //if(this.collectFromRuin(creepName, resourceType)) return;
           //if(this.collectFromTombstone(creepName, resourceType)) return;
+          // if(this.collectFromStorage(creepName, resourceType)) return;
         }
         else{
-          if(this.collectFromDroppedResource(creepName, resourceType)) return;
+          // if(this.collectFromDroppedResource(creepName, resourceType)) return;
           //if(this.collectFromRuin(creepName, resourceType)) return;
           //if(this.collectFromTombstone(creepName, resourceType)) return;
           if(this.collectFromStorage(creepName, resourceType)) return;

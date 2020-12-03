@@ -1,5 +1,6 @@
 import { TaskFactory } from "core/TaskFactory";
 import { StructureTaskType } from "core/types";
+import { memoryUsage } from "process";
 import { StructureTask } from "tasks/base/StructureTask";
 import { StructureTaskRequest } from "tasks/model/StructureTaskRequest";
 import { Logger } from "utils/Logger";
@@ -28,21 +29,21 @@ export class UpgradeRampartsTask extends StructureTask<StructureTower> {
 
     public structureType: StructureConstant = STRUCTURE_TOWER;
     public type: StructureTaskType = StructureTaskType.UpgradeRamparts
+    public energyUsePerTask: number = 300;
 
     protected prepare(structureId: Id<StructureTower>): void {
-        const memory = this.getMemory(structureId);
-        if(memory === undefined){
-            Logger.LogError(`Memory for ${this.structureType}${structureId} was undefined!`);
-            return;
-        }
+
+        const memory = this.getStructureMemory(structureId);
         memory.currentTaskStatus = "WORKING";
+
+
     }
 
     protected work(structureId: Id<StructureTower>): void {
 
+        const memory = this.getStructureMemory(structureId);
 
         const tower = Game.getObjectById(structureId) as StructureTower;
-        const memory = this.getMemory(structureId)!;
         if(tower === undefined || tower === null) return;
 
         if(_.any(global.taskManager.getTasks(tower.room.name, StructureTaskType.DefendRoomTask))){
@@ -51,10 +52,8 @@ export class UpgradeRampartsTask extends StructureTask<StructureTower> {
         }
         if(tower.store.energy <= tower.store.getCapacity(RESOURCE_ENERGY) / 2) {
             this.unassignStructure(structureId);
-
             return;
         }
-
 
         const ramparts = Game.rooms[tower.room.name].find(FIND_MY_STRUCTURES, {
             filter: (s) => s.structureType == "rampart"
@@ -66,16 +65,7 @@ export class UpgradeRampartsTask extends StructureTask<StructureTower> {
         }
 
     }
-    unassignStructure(structureId: Id<StructureTower>) {
 
-        const memory = this.getMemory(structureId);
-        if(memory){
-            memory.currentTaskStatus = "WAITING";
-            memory.currentTaskId = "";
-        }
-        const request = this.request as StructureTaskRequest;
-        _.remove(request.structuresAssigned, structureId);
-    }
 
     protected cooldown(structureId: Id<StructureTower>): void {
     }
@@ -103,12 +93,6 @@ export class UpgradeRampartsTask extends StructureTask<StructureTower> {
         if(tasks.length == 0){
             global.taskManager.addTaskRequest(new UpgradeRampartsRequest(roomName))
         }
-
-
-
-
-
-        //global.taskManager.addTaskRequest();
 
     }
 

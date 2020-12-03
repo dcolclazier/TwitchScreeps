@@ -1,8 +1,8 @@
 import TaskType, { LinkType, StructureTaskType } from "../../core/types";
 import { MemoryHandlerFactory } from "core/MemoryHandlerFactory";
 import { Logger } from "utils/Logger";
-import { StructureMemory } from "memory/StructureMemory";
-import { StructureMemoryHandler } from "memory/MemoryHandler";
+import { StructureMemory } from "memory/base/StructureMemory";
+import { StructureMemoryHandler } from "memory/base/MemoryHandler";
 
 
 export class LinkMemory extends StructureMemory<StructureLink> {
@@ -14,7 +14,7 @@ export class LinkMemory extends StructureMemory<StructureLink> {
     constructor(id: Id<StructureLink>, linkType: LinkType){
         super(id);
         this.linkType = linkType;
-        this.shouldSend = linkType != LinkType.Storage;
+        this.shouldSend = linkType != LinkType.Storage && linkType != LinkType.Upgrade;
     }
 }
 @MemoryHandlerFactory.register
@@ -37,31 +37,23 @@ export class LinkMemoryHandler implements StructureMemoryHandler {
 
         const storage = Game.rooms[link.room.name].storage;
         if (storage != undefined && link.pos.getRangeTo(storage) <= 2) {
-            Logger.LogDebug("Passed storage test");
             return LinkType.Storage;
-        }
-        else {
-            Logger.LogDebug("Failed storage test " + link.pos.getRangeTo(storage!));
-
         }
 
         if (link.pos.x <= 2 || link.pos.x >= 47 || link.pos.y <= 2 || link.pos.y >= 47) {
-            Logger.LogDebug("Passed edge test");
             return LinkType.Edge;
-        }
-        else {
-            Logger.LogDebug("Failed edge test");
         }
 
         const sources = _.map(Game.rooms[link.room.name].memory.sources, s => Game.getObjectById(s.id) as Source)
         for (let source of sources) {
             if (link.pos.getRangeTo(source) <= 2) {
-                Logger.LogDebug("Passed source test");
                 return LinkType.Harvest;
-
             }
-            else {
-                Logger.LogDebug("Failed source test" + link.pos.getRangeTo(source));
+        }
+        const controller = Game.rooms[link.room.name].controller;
+        if(controller != undefined){
+            if(link.pos.getRangeTo(controller) <= 8){
+                return LinkType.Upgrade;
             }
         }
 

@@ -5,17 +5,24 @@ import { FillTowersTask } from "tasks/creep/FillTowersTask";
 import { DefendRoomTowerTask } from "tasks/structure/DefendRoomTowerTask";
 import { MineTask } from "tasks/creep/MineTask";
 import { RestockTask } from "tasks/creep/RestockTask";
-import { UpgradeTask } from "tasks/creep/UpgradeTask";
+import { BasicUpgradeTask } from "tasks/creep/UpgradeTask";
 import { LinkMemoryHandler } from "memory/structure/LinkMemory";
 import { UpgradeRampartsTask } from "tasks/structure/UpgradeRamparts";
 import { TowerMemoryHandler } from "memory/structure/TowerMemory";
 import { SourceMemoryHandler } from "memory/room/SourceMemory";
+import { SpawnMemoryHandler } from "memory/structure/SpawnMemory";
+import { ControllerMemoryHandler } from "memory/structure/ControllerMemory";
+import { AttackEventHandler, ObjectDestroyedEventHandler } from "./Governor";
 
 export class MemoryCatalogInit{
   static init() : void{
       TowerMemoryHandler.name
       LinkMemoryHandler.name
       SourceMemoryHandler.name
+      SpawnMemoryHandler.name
+      ControllerMemoryHandler.name
+      AttackEventHandler.name
+      ObjectDestroyedEventHandler.name
       //Only way I could figure out how to call the class decorators to add these to the ITaskCatalog... ugh.
   }
 }
@@ -25,7 +32,7 @@ export class TaskCatalogInit{
         BuildTask.name;
         RestockTask.name;
         MineTask.name;
-        UpgradeTask.name;
+        BasicUpgradeTask.name;
         FillTowersTask.name
         DefendRoomTowerTask.name
         FillStorageTask.name
@@ -48,6 +55,17 @@ export class TaskCatalogInit{
         acceptedJobTypes: [JobType.Builder]
       },
       [SpawnLevel.Level2]:{
+        priority: 3,
+        creepsPerTask: {
+          [JobType.Janitor]:0,
+          [JobType.Miner]:0,
+          [JobType.Upgrader]:0,
+          [JobType.Worker]:1,
+          [JobType.Builder]:1
+        },
+        acceptedJobTypes: [JobType.Builder, JobType.Worker]
+      },
+      [SpawnLevel.Level3]:{
         priority: 3,
         creepsPerTask: {
           [JobType.Janitor]:0,
@@ -81,6 +99,17 @@ export class TaskCatalogInit{
           [JobType.Builder]:0
         },
         acceptedJobTypes: [JobType.Miner]
+      },
+      [SpawnLevel.Level3]:{
+        priority: 1,
+        creepsPerTask: {
+          [JobType.Janitor]:0,
+          [JobType.Miner]:1,
+          [JobType.Upgrader]:0,
+          [JobType.Worker]:0,
+          [JobType.Builder]:0
+        },
+        acceptedJobTypes: [JobType.Miner]
       }
     },
     [CreepTaskType.RestockTask]:{
@@ -96,7 +125,18 @@ export class TaskCatalogInit{
         acceptedJobTypes: [JobType.Janitor]
       },
       [SpawnLevel.Level2]:{
-        priority: 2,
+        priority: 1,
+        creepsPerTask: {
+          [JobType.Janitor]:2,
+          [JobType.Miner]:0,
+          [JobType.Upgrader]:0,
+          [JobType.Worker]:0,
+          [JobType.Builder]:0
+        },
+        acceptedJobTypes: [JobType.Janitor, JobType.Worker]
+      },
+      [SpawnLevel.Level3]:{
+        priority: 1,
         creepsPerTask: {
           [JobType.Janitor]:2,
           [JobType.Miner]:0,
@@ -129,6 +169,17 @@ export class TaskCatalogInit{
           [JobType.Builder]:0
         },
         acceptedJobTypes: [JobType.Upgrader]
+      },
+      [SpawnLevel.Level3]:{
+        priority: 3,
+        creepsPerTask: {
+          [JobType.Janitor]:0,
+          [JobType.Miner]:0,
+          [JobType.Upgrader]:2,
+          [JobType.Worker]:0,
+          [JobType.Builder]:0
+        },
+        acceptedJobTypes: [JobType.Upgrader]
       }
     },
     [CreepTaskType.FillTowersTask]:{
@@ -144,6 +195,17 @@ export class TaskCatalogInit{
         acceptedJobTypes: [JobType.Janitor]
       },
       [SpawnLevel.Level2]:{
+        priority: 1,
+        creepsPerTask: {
+          [JobType.Janitor]:1,
+          [JobType.Miner]:0,
+          [JobType.Upgrader]:0,
+          [JobType.Worker]:1,
+          [JobType.Builder]:0
+        },
+        acceptedJobTypes: [JobType.Janitor, JobType.Worker]
+      },
+      [SpawnLevel.Level3]:{
         priority: 1,
         creepsPerTask: {
           [JobType.Janitor]:1,
@@ -177,6 +239,17 @@ export class TaskCatalogInit{
           [JobType.Builder]:0
         },
         acceptedJobTypes: [JobType.Janitor, JobType.Worker]
+      },
+      [SpawnLevel.Level3]:{
+        priority: 6,
+        creepsPerTask: {
+          [JobType.Janitor]:1,
+          [JobType.Miner]:0,
+          [JobType.Upgrader]:0,
+          [JobType.Worker]:1,
+          [JobType.Builder]:0
+        },
+        acceptedJobTypes: [JobType.Janitor, JobType.Worker]
       }
     }
   }
@@ -193,6 +266,11 @@ export class TaskCatalogInit{
         bodyParts: [MOVE, MOVE, CARRY, CARRY, WORK, WORK],
         taskTypes: [CreepTaskType.BuildTask, CreepTaskType.RestockTask, CreepTaskType.FillTowersTask, CreepTaskType.FillStorageTask],
         maxPerRoom: 0
+      },
+      [SpawnLevel.Level3]: {
+        bodyParts: [MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, CARRY, WORK, WORK, WORK],
+        taskTypes: [CreepTaskType.BuildTask, CreepTaskType.RestockTask, CreepTaskType.FillTowersTask, CreepTaskType.FillStorageTask],
+        maxPerRoom: 0
       }
     },
     [JobType.Janitor]:{
@@ -205,6 +283,11 @@ export class TaskCatalogInit{
         bodyParts: [MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, CARRY],
         taskTypes: [CreepTaskType.RestockTask, CreepTaskType.FillTowersTask, CreepTaskType.FillStorageTask],
         maxPerRoom:3
+      },
+      [SpawnLevel.Level3]: {
+        bodyParts: [MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY],
+        taskTypes: [CreepTaskType.RestockTask, CreepTaskType.FillTowersTask, CreepTaskType.FillStorageTask],
+        maxPerRoom:3
       }
     },
     [JobType.Miner]:{
@@ -214,6 +297,11 @@ export class TaskCatalogInit{
         maxPerRoom: 4
       },
       [SpawnLevel.Level2]: {
+        bodyParts: [MOVE, MOVE, WORK, WORK, WORK, WORK, WORK],
+        taskTypes: [CreepTaskType.MineTask],
+        maxPerRoom:4
+      },
+      [SpawnLevel.Level3]: {
         bodyParts: [MOVE, MOVE, WORK, WORK, WORK, WORK, WORK],
         taskTypes: [CreepTaskType.MineTask],
         maxPerRoom:4
@@ -229,6 +317,11 @@ export class TaskCatalogInit{
         bodyParts: [MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, WORK, WORK],
         taskTypes: [CreepTaskType.UpgradeTask],
         maxPerRoom:4
+      },
+      [SpawnLevel.Level3]: {
+        bodyParts: [MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, CARRY, WORK, WORK, WORK, WORK],
+        taskTypes: [CreepTaskType.UpgradeTask],
+        maxPerRoom:2
       }
     },
     [JobType.Builder]: {
@@ -241,6 +334,11 @@ export class TaskCatalogInit{
         bodyParts: [MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, WORK, WORK, WORK],
         taskTypes: [CreepTaskType.BuildTask],
         maxPerRoom:2
+      },
+      [SpawnLevel.Level3]: {
+        bodyParts: [MOVE, MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, CARRY, WORK, WORK, WORK, WORK ],
+        taskTypes: [CreepTaskType.BuildTask],
+        maxPerRoom:2
       }
     }
   }
@@ -248,11 +346,15 @@ export class TaskCatalogInit{
   global.structureTaskCatalog = {
     [StructureTaskType.DefendRoomTask]: {
       [SpawnLevel.Level1]:{
-        maxStructuresPerTask:6,
+        maxStructuresPerTask:1,
         priority: 1
       },
       [SpawnLevel.Level2]:{
-        maxStructuresPerTask:6,
+        maxStructuresPerTask:2,
+        priority: 1
+      },
+      [SpawnLevel.Level3]:{
+        maxStructuresPerTask:3,
         priority: 1
       }
     },
@@ -264,6 +366,10 @@ export class TaskCatalogInit{
       [SpawnLevel.Level2]:{
         maxStructuresPerTask:6,
         priority: 8
+      },
+      [SpawnLevel.Level3]:{
+        maxStructuresPerTask:6,
+        priority: 8
       }
     },
     [StructureTaskType.UpgradeRamparts]: {
@@ -272,6 +378,10 @@ export class TaskCatalogInit{
         priority: 3
       },
       [SpawnLevel.Level2]:{
+        maxStructuresPerTask:6,
+        priority: 3
+      },
+      [SpawnLevel.Level3]:{
         maxStructuresPerTask:6,
         priority: 3
       }

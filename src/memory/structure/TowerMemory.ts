@@ -1,8 +1,8 @@
-import TaskType, { StructureTaskType } from "../../core/types";
-import { StructureMemory } from "memory/StructureMemory";
+import TaskType, { StructureTaskType } from "core/types";
+import { StructureMemory } from "memory/base/StructureMemory";
 import { MemoryHandlerFactory } from "core/MemoryHandlerFactory";
 import { Logger } from "utils/Logger";
-import { StructureMemoryHandler } from "memory/MemoryHandler";
+import { StructureMemoryHandler } from "memory/base/MemoryHandler";
 
 @MemoryHandlerFactory.register
 export class TowerMemoryHandler implements StructureMemoryHandler{
@@ -15,7 +15,7 @@ export class TowerMemoryHandler implements StructureMemoryHandler{
 }
 export class TowerMemory extends StructureMemory<StructureTower> {
     acceptedTaskTypes: TaskType[] = [StructureTaskType.DefendRoomTask, StructureTaskType.UpgradeRamparts];
-    structureType: StructureConstant = "tower";
+    structureType: StructureConstant = STRUCTURE_TOWER;
 
     constructor(id: Id<StructureTower>) {
         super(id);

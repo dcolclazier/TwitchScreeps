@@ -6,7 +6,7 @@ interface Memory {
     structures: {[roomName:string] : {[structureType:string]: {[structureId:string] : IStructureMemory}}}
 
     //todo - easier to index when I have more room
-    tasksN: {[roomName:string] : {[taskType:string]: {[requestId:string] : ITaskRequest}}}
+    tasks: {[roomName:string] : {[taskType:string]: {[requestId:string] : ITaskRequest}}}
  }
 
 

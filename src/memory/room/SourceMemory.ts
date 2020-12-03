@@ -1,8 +1,8 @@
 import TaskType from "../../core/types";
-import { RoomObjectMemory } from "memory/StructureMemory";
+import { RoomObjectMemory } from "memory/base/RoomObjectMemory";
 import { MemoryHandlerFactory } from "core/MemoryHandlerFactory";
 import { Logger } from "utils/Logger";
-import { RoomObjectMemoryHandler } from "memory/MemoryHandler";
+import { RoomObjectMemoryHandler } from "memory/base/MemoryHandler";
 
 @MemoryHandlerFactory.register
 export class SourceMemoryHandler implements RoomObjectMemoryHandler{

@@ -20,10 +20,11 @@ export enum CreepTaskType {
     FillTowersTask = "FillTowersTask",
     FillStorageTask = "FillStorageTask"
 }
-export enum LinkType{
+export enum LinkType {
     Harvest = "Harvest",
     Storage = "Storage",
-    Edge= "Edge"
+    Edge = "Edge",
+    Upgrade = "Upgrade"
 }
 export enum StructureTaskType {
     DefendRoomTask = "DefendRoomTask",
@@ -33,7 +34,8 @@ export enum StructureTaskType {
 
 export enum SpawnLevel {
     Level1 = 1,
-    Level2
+    Level2,
+    Level3
 }
 
 export type TaskType =

@@ -9,21 +9,19 @@ export class TaskManager{
 
     public addTaskRequest(request : ITaskRequest){
 
-        Logger.LogInformation(`Registering ${request.targetRoom}::${request.category}:${request.type}:${request.id} request`)
-        if(!Memory.tasksN[request.targetRoom][request.type]){
-            Memory.tasksN[request.targetRoom][request.type] = {};
+        Logger.LogTrace(`Registering ${request.targetRoom}::${request.category}:${request.type}:${request.id} request`)
+        if(!Memory.tasks[request.targetRoom][request.type]){
+            Memory.tasks[request.targetRoom][request.type] = {};
         }
-        Memory.tasksN[request.targetRoom][request.type][request.id] = request;
+        Memory.tasks[request.targetRoom][request.type][request.id] = request;
     }
 
     public getTasks(roomName: string, type: TaskType) : ITaskRequest[]{
 
-        return _.map(Memory.tasksN[roomName][type], m => m);
+        return _.map(Memory.tasks[roomName][type], m => m);
     }
 
     public runTasks(roomName:string): void{
-
-        const tasksN = Memory.tasksN[roomName];
 
         const room = Game.rooms[roomName];
         if(room === undefined || room === null) {
@@ -32,17 +30,17 @@ export class TaskManager{
         }
         this.addTaskRequests(roomName);
 
-        for(const taskType in tasksN)
+        const roomTasks = Memory.tasks[roomName];
+        for(const taskType in roomTasks)
         {
             Logger.LogTrace(`Processing ${taskType} tasks...`);
-            for(const id in tasksN[taskType])
+            for(const id in roomTasks[taskType])
             {
-                Logger.LogTrace(`  Processing task ${id}`);
-                const request = tasksN[taskType][id];
+                const request = roomTasks[taskType][id];
                 if(request.isFinished)
                 {
                     Logger.LogTrace(`    Unregistering complete task ${request.type}${request.id}`);
-                    delete tasksN[taskType][id];
+                    delete roomTasks[taskType][id];
                 }
                 else{
                     switch(request.category){
@@ -55,7 +53,7 @@ export class TaskManager{
                 }
             }
         }
-        Memory.tasksN[roomName] = tasksN;
+        Memory.tasks[roomName] = roomTasks;
     }
     private processStructureTaskRequest(roomName: string, taskType: TaskType, requestId: string) {
 
@@ -107,7 +105,7 @@ export class TaskManager{
     }
     private assignMissingStructures(roomName: string, taskType: TaskType, requestId: string) {
 
-        const request = Memory.tasksN[roomName][taskType][requestId] as StructureTaskRequest;
+        const request = Memory.tasks[roomName][taskType][requestId] as StructureTaskRequest;
         const spawnLevel = Governor.getSpawnLevel(roomName);
 
         const structureType = request.structureType;
@@ -126,7 +124,7 @@ export class TaskManager{
 
     private assignMissingCreeps(roomName: string, taskType: TaskType, requestId: string) {
 
-        const request = Memory.tasksN[roomName][taskType][requestId] as CreepTaskRequest;
+        const request = Memory.tasks[roomName][taskType][requestId] as CreepTaskRequest;
         const spawnLevel = Governor.getSpawnLevel(roomName);
         const acceptedJobTypes = global.creepTaskCatalog[request.type][spawnLevel].acceptedJobTypes;
 
@@ -148,8 +146,7 @@ export class TaskManager{
 
     assignRequestToStructure(roomName: string, requestId: string, taskType: TaskType, structureType: StructureConstant) : boolean{
 
-        // const request = Memory.tasks[roomName][requestId] as StructureTaskRequest;
-        const request = Memory.tasksN[roomName][taskType][requestId] as StructureTaskRequest;
+        const request = Memory.tasks[roomName][taskType][requestId] as StructureTaskRequest;
         let structureId = this.getUnassignedStructure(roomName, taskType, request.id, structureType);
         if(structureId === undefined) {
             Logger.LogTrace("In assignRequestToStructure, couldn't assign - idle structure not found.");
@@ -168,11 +165,14 @@ export class TaskManager{
         }
 
         const task = TaskFactory.getTask(request);
-        if(!task.canAssign(structureId)) return false;
+        if(task){
+            if(!task.canAssign(structureId)) return false;
+        }
 
-
+        const memory = Memory.structures[roomName][structureType][structureId];
+        memory.currentTaskId = request.id;
         request.structuresAssigned.push(structureId);
-        Logger.LogInformation(`Assigned ${request.type}${request.id} to ${structureType}${structure.id}`);
+        Logger.LogTrace(`Assigned ${request.type}${request.id} to ${structureType}${structure.id}`);
         return true;
 
     }
@@ -180,9 +180,7 @@ export class TaskManager{
 
     private assignRequestToCreep(roomName: string, taskType: TaskType, requestId: string) : boolean {
 
-        // const request = Memory.tasks[roomName][requestId] as CreepTaskRequest
-
-        const request = Memory.tasksN[roomName][taskType][requestId] as CreepTaskRequest;
+        const request = Memory.tasks[roomName][taskType][requestId] as CreepTaskRequest;
         if(request.targetRoom === undefined) return false;
         let creepName = this.getUnassignedCreep(request.targetRoom, request.type);
         if(creepName === undefined) {
@@ -198,30 +196,31 @@ export class TaskManager{
 
         creep.memory.currentTaskId = request.id;
         request.creepsAssigned.push(creepName);
-        Logger.LogInformation(`Assigned ${request.type}${request.id} to ${creepName}`)
+        Logger.LogTrace(`Assigned ${request.type}${request.id} to ${creepName}`)
         return true;
 
     }
     private unassignDeadStructures(roomName: string, taskType: TaskType, requestId: string): StructureTaskRequest {
-        const request = Memory.tasksN[roomName][taskType][requestId] as StructureTaskRequest;
+        const request = Memory.tasks[roomName][taskType][requestId] as StructureTaskRequest;
         for(let id of request.structuresAssigned){
             const structure = Game.getObjectById(id);
             if(structure === null || structure === undefined)
             {
-                Logger.LogInformation(`Unassigning ${id} from ${request.category}${request.id} (Dead)`)
+                Logger.LogTrace(`Unassigning ${id} from ${request.category}${request.id} (Dead)`)
                 _.remove(request.structuresAssigned, id);
             }
         }
         return request;
     }
     private unassignDeadCreeps(roomName: string, taskType: TaskType, requestId: string) : CreepTaskRequest{
-        const request = Memory.tasksN[roomName][taskType][requestId] as CreepTaskRequest;
-        for(let creepId of request.creepsAssigned){
-            const creep = Game.creeps[creepId];
+        const request = Memory.tasks[roomName][taskType][requestId] as CreepTaskRequest;
+        for(let i in request.creepsAssigned){
+            const assignedCreepName = request.creepsAssigned[i];
+            const creep = Game.creeps[assignedCreepName];
             if(creep === null || creep === undefined)
             {
-                Logger.LogInformation(`Unassigning ${creepId} from ${request.category}${request.id} (Dead)`);
-                _.remove(request.creepsAssigned, creepId);
+                Logger.LogTrace(`Unassigning ${assignedCreepName} from ${request.category}${request.id} (Dead)`);
+                request.creepsAssigned = _.filter(request.creepsAssigned, id => id != assignedCreepName);
             }
         }
         return request;

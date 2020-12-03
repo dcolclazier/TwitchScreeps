@@ -3,7 +3,6 @@ import { TaskFactory } from "core/TaskFactory";
 import { Logger } from "utils/Logger";
 import { StructureTaskRequest } from "tasks/model/StructureTaskRequest";
 import { StructureTask } from "tasks/base/StructureTask";
-import { StructureMemory } from "memory/StructureMemory";
 
 
 export class DefendRoomTowerRequest extends StructureTaskRequest{
@@ -27,9 +26,7 @@ export class DefendRoomTowerTask extends StructureTask<StructureTower> {
 
     protected prepare(structureId: Id<StructureTower>): void {
 
-        const tower = Game.getObjectById(structureId) as StructureTower;
-        const structureMem = Memory.structures[tower.room.name][this.structureType][structureId] as StructureMemory<StructureTower>;
-        structureMem.currentTaskStatus = "WORKING";
+        this.getStructureMemory(structureId).currentTaskStatus = "WORKING";
     }
 
     protected work(structureId: Id<StructureTower>): void {
@@ -37,12 +34,12 @@ export class DefendRoomTowerTask extends StructureTask<StructureTower> {
         Logger.LogTrace(`In DefendRoomTowerTask::work: id = ${structureId}`);
         const tower = Game.getObjectById(structureId) as StructureTower;
 
-        const towerMem = Memory.structures[tower.room.name][this.structureType][structureId] as StructureMemory<StructureTower>;
-
+        const mem = this.getStructureMemory(structureId);
         const enemies = Game.rooms[tower.room.name].find(FIND_HOSTILE_CREEPS);
-
-        if (enemies.length === 0)
-            towerMem.currentTaskStatus = "DONE";
+        if (enemies.length === 0){
+            mem.currentTaskStatus = "DONE";
+            return;
+        }
 
         const closeEnemies = _.filter(enemies, enemy => tower.pos.getRangeTo(enemy) < 8);
         if(closeEnemies.length === 0) return;
@@ -66,8 +63,9 @@ export class DefendRoomTowerTask extends StructureTask<StructureTower> {
 
         const firstTowerId = _.first(towers).id as Id<StructureTower>;
 
-        global.taskManager.addTaskRequest(new DefendRoomTowerRequest(firstTowerId, roomName));
-
+        if(!_.any(global.taskManager.getTasks(roomName, StructureTaskType.DefendRoomTask))){
+            global.taskManager.addTaskRequest(new DefendRoomTowerRequest(firstTowerId, roomName));
+        }
     }
 
 }

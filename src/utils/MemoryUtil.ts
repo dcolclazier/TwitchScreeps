@@ -1,9 +1,9 @@
 import { MemoryHandlerFactory } from "core/MemoryHandlerFactory";
 import { JobType, SpawnLevel } from "core/types";
 import { Logger } from "utils/Logger";
-import { MemoryCatalogInit, TaskCatalogInit } from "../catalog/Catalog";
+import { MemoryCatalogInit, TaskCatalogInit } from "../core/Catalog";
 
-export const MemoryVersion = 1
+
 export class MemoryUtil
 {
   public cleanupCreeps() : void {
@@ -20,7 +20,7 @@ export class MemoryUtil
 
     TaskCatalogInit.init();
     MemoryCatalogInit.init();
-    if(Memory.version === undefined || MemoryVersion != Memory.version)
+    if(Memory.version === undefined || global.memoryVersion != Memory.version)
     {
       Logger.LogWarning("Global reset!");
       Logger.LogInformation("Resetting memory...");
@@ -40,12 +40,12 @@ export class MemoryUtil
     mem.flags = {};
     // mem.tasks = {};
     mem.structures = {};
-    mem.tasksN = {};
+    mem.tasks = {};
 
 
     this.InitRoomsMemory();
     this.InitCreepMemory()
-    mem.version = MemoryVersion;
+    mem.version = global.memoryVersion;
 
   }
 
@@ -76,9 +76,7 @@ export class MemoryUtil
 
 
       Logger.LogInformation(`Clearing task list for ${roomName} `);
-      // Memory.tasks[name] = {}; //old
-      Memory.tasksN[roomName] = {};
-
+      Memory.tasks[roomName] = {};
       Memory.structures[roomName] = {}
 
 
@@ -122,7 +120,7 @@ export class MemoryUtil
     Logger.LogDebug(`Initializing memory for ${structureType}s`);
 
     var ctor = MemoryHandlerFactory.getHandler(structureType);
-    if(ctor == undefined){
+    if(ctor === undefined){
       Logger.LogWarning(`No memory handler found for ${structureType}`);
       return;
     }

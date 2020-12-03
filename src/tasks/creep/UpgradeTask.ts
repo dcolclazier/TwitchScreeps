@@ -4,14 +4,10 @@ import { TaskFactory } from "core/TaskFactory";
 import { Logger } from "utils/Logger";
 import { CreepTaskRequest } from "tasks/model/CreepTaskRequest";
 
-export class UpgradeTaskRequest extends CreepTaskRequest {
+export class BasicUpgradeTaskRequest extends CreepTaskRequest {
 
     type: CreepTaskType = CreepTaskType.UpgradeTask;
     usesTargetId: boolean = true;
-    getTask(): ICreepTask {
-        return new UpgradeTask(this);
-    }
-
     constructor(constructionSiteId: Id<StructureController>, originatingRoom: string, targetRoom: string) {
         super(originatingRoom, targetRoom, constructionSiteId);
 
@@ -19,7 +15,7 @@ export class UpgradeTaskRequest extends CreepTaskRequest {
 }
 
 @TaskFactory.register
-export class UpgradeTask extends CreepTask {
+export class BasicUpgradeTask extends CreepTask {
 
     image: string = "✨";
     type: CreepTaskType = CreepTaskType.UpgradeTask;
@@ -77,7 +73,7 @@ export class UpgradeTask extends CreepTask {
 
         if(!_.any(upgradeTasks)){
             Logger.LogTrace(`Adding ${this.type} task to room ${roomName}`);
-            global.taskManager.addTaskRequest(new UpgradeTaskRequest(room.controller.id, roomName, roomName))
+            global.taskManager.addTaskRequest(new BasicUpgradeTaskRequest(room.controller.id, roomName, roomName))
         }
     }
     canAssign(workerId: string): boolean {

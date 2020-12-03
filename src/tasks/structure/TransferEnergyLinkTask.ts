@@ -30,7 +30,7 @@ export class TransferEnergyLinkTask extends StructureTask<StructureLink> {
 
     protected prepare(structureId: string): void {
 
-        const memory = this.getMemory(structureId as Id<StructureLink>);
+        const memory = this.getStructureMemory(structureId as Id<StructureLink>);
         if(memory === undefined){
             Logger.LogError(`Memory for ${this.structureType}${structureId} was undefined!`);
             return;
@@ -59,7 +59,7 @@ export class TransferEnergyLinkTask extends StructureTask<StructureLink> {
     protected work(structureId: string): void {
         if(this.targetId === undefined) throw Error("this should never happen.");
 
-        const memory = this.getMemory(structureId as Id<StructureLink>);
+        const memory = this.getStructureMemory(structureId as Id<StructureLink>);
         if(memory === undefined){
             Logger.LogError(`Memory for ${this.structureType}${structureId} was undefined!`);
             return;
@@ -74,13 +74,13 @@ export class TransferEnergyLinkTask extends StructureTask<StructureLink> {
 
         // we have a target, if we need to send, send.
         const structureRequest = this.request as StructureTaskRequest;
-        for(let id in structureRequest.structuresAssigned){
+        for(let structureId of structureRequest.structuresAssigned){
 
-            const myId = structureRequest.structuresAssigned[id];
+
             // const linkInfo = Game.rooms[this.request.targetRoom].memory.links[myId];
-            const linkInfo = Memory.structures[target.room.name][this.type][target.id] as LinkMemory;
+            const linkInfo = this.getStructureMemory(structureId as Id<StructureLink>);
             if(linkInfo === undefined){
-                Logger.LogError(`Couldn't find link info for link with id of ${myId}`);
+                Logger.LogError(`Couldn't find link info for link with id of ${structureId}`);
                 continue;
             }
             const thisLink = Game.getObjectById(linkInfo.id) as StructureLink;

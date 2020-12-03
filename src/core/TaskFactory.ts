@@ -6,8 +6,9 @@ export namespace TaskFactory {
 
       return _.map(handlers, h=> new h());
     }
-    export function getTask(request: ITaskRequest): ITask{
+    export function getTask(request: ITaskRequest): ITask | undefined{
       var task = handlers[request.type];
+      if(task === undefined || task === null) return undefined;
       return new task(request);
     }
     export function register<T extends Constructor<ITask>>(ctor: T) {

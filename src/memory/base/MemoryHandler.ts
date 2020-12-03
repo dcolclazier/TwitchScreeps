@@ -1,5 +1,3 @@
-import { StructureMemory } from "./StructureMemory";
-
 export abstract class MemoryHandler implements IMemoryHandler{
     abstract registerMemory(roomName: string, id: string): void;
     abstract memoryObjectType: MemoryObjectConstant;
